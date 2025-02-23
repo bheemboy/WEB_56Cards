@@ -1,8 +1,6 @@
 <script lang="ts">
-    export let team:number;
-    export let koolie_count:number;
-
-    $: background_image = team==0? 'images/Glass_button_blue.svg': 'images/Glass_button_red.svg';
+    const { team, koolie_count } = $props<{ team: number, koolie_count: number }>();
+    const background_image = team==0? 'images/Glass_button_blue.svg': 'images/Glass_button_red.svg';
 </script>
 
 <div class="kooliebar">

@@ -1,43 +1,42 @@
 <script lang="ts">
   import { navigate } from "svelte-routing";
+  import { onMount } from "svelte";
 
-  let playerName = "";
-  let tableSize = "4";
-  let tableName = "";
-  let language = "english";
-  
-  function handlePlay() {
-    if (!playerName) {
+  interface GameSettings {
+    userName: string;
+    tableType: string;
+    tableName: string;
+    language: string;
+  }
+
+  let settings = $state<GameSettings>({
+    userName: "",
+    tableType: "0",
+    tableName: "",
+    language: "ml"
+  });
+
+  onMount(() => {
+    const savedSettings = localStorage.getItem("56cards_settings");
+    if (savedSettings) {
+      try {
+        const loaded: GameSettings = JSON.parse(savedSettings);
+        settings = { ...settings, ...loaded };
+      } catch (e) {
+        console.error("Error loading saved settings:", e);
+      }
+    }
+  });
+
+  function playGame(watch = false) {
+    if (!settings.userName) {
       alert("Please enter your name before joining the game");
       return;
     }
     
-    console.log({
-      playerName,
-      tableSize,
-      tableName,
-      language,
-      mode: "play"
-    });
+    localStorage.setItem("56cards_settings", JSON.stringify(settings));
     
-    navigate(`/table?playerName=${playerName}&tableSize=${tableSize}&tableName=${tableName}&language=${language}&mode=play`);
-  }
-  
-  function handleWatch() {
-    if (!playerName) {
-      alert("Please enter your name before watching the game");
-      return;
-    }
-    
-    console.log({
-      playerName,
-      tableSize,
-      tableName,
-      language,
-      mode: "watch"
-    });
-    
-    navigate(`/table?playerName=${playerName}&tableSize=${tableSize}&tableName=${tableName}&language=${language}&mode=watch`);
+    navigate(`/table?username=${settings.userName}&tabletype=${settings.tableType}&tablename=${settings.tableName}&lang=${settings.language}&watch=${watch}`);
   }
 </script>
 
@@ -53,23 +52,23 @@
     
     <form>
       <div class="form-group">
-        <label for="playerName">Player Name</label>
+        <label for="userName">Player Name</label>
         <input 
-          id="playerName"
+          id="userName"
           type="text" 
-          bind:value={playerName} 
+          bind:value={settings.userName} 
           placeholder="Enter your name"
           required
         />
       </div>
       
       <div class="form-group">
-        <label for="tableSize">Table Size</label>
+        <label for="tableType">Table Size</label>
         <div class="select-wrapper">
-          <select id="tableSize" bind:value={tableSize}>
-            <option value="4">4 Players</option>
-            <option value="6">6 Players</option>
-            <option value="8">8 Players</option>
+          <select id="tableType" bind:value={settings.tableType}>
+            <option value="0">4 Players</option>
+            <option value="1">6 Players</option>
+            <option value="2">8 Players</option>
           </select>
         </div>
       </div>
@@ -79,30 +78,26 @@
         <input 
           id="tableName"
           type="text" 
-          bind:value={tableName} 
+          bind:value={settings.tableName} 
           placeholder="Leave empty for random table"
         />
       </div>
       
       <div class="form-group">
-        <label>Language</label>
-        <div class="radio-group language-group">
-          <label class="radio-label">
-            <input type="radio" name="language" value="english" bind:group={language}>
-            <span>English</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="language" value="malayalam" bind:group={language}>
-            <span>Malayalam</span>
-          </label>
+        <label for="language">Language</label>
+        <div class="select-wrapper">
+          <select id="language" bind:value={settings.language}>
+            <option value="en">English</option>
+            <option value="ml">Malayalam</option>
+          </select>
         </div>
       </div>
-      
+            
       <div class="action-buttons">
-        <button type="button" class="play-btn" on:click={handlePlay}>
+        <button type="button" class="play-btn" onclick={() => playGame(true)}>
           Play Game
         </button>
-        <button type="button" class="watch-btn" on:click={handleWatch}>
+        <button type="button" class="watch-btn" onclick={() => playGame(false)}>
           Watch Game
         </button>
       </div>
@@ -253,43 +248,7 @@
     appearance: none;
     cursor: pointer;
   }
-  
-  .radio-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 8px;
-  }
-  
-  .radio-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 8px 15px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    transition: all 0.3s;
-    border: 1px solid #aaa;  /* Darker border */
-  }
-  
-  .radio-label:hover {
-    background-color: rgba(13, 36, 115, 0.1);
-  }
-  
-  .radio-label input {
-    display: none;
-  }
-  
-  .radio-label span {
-    color: #333333;  /* Darker text for radio labels */
-    font-weight: 500;
-  }
-  
-  .radio-label input:checked + span {
-    color: #0d2473;
-    font-weight: 700;  /* Bolder text when selected */
-  }
-    
+      
   .action-buttons {
     display: flex;
     gap: 10px;

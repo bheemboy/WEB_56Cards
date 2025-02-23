@@ -1,11 +1,6 @@
 <script lang="ts">
     import Card from "./Card.svelte";
-    export let cards:string[] = [];
-    
-    const scale=17; //percentage
-    const percardrotation = 13; //degrees
-    const percardtranslation = 14; //pixels
-
+    const { cards, scale = 17, percardrotation = 13, percardtranslation = 14 } = $props<{ cards: string[], scale?: number, percardrotation?: number, percardtranslation?: number }>();
 </script>
 
 <div class="deck">
