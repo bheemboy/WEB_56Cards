@@ -1,6 +1,6 @@
 <script lang="ts">
-    const { team, koolie_count } = $props<{ team: number, koolie_count: number }>();
-    const background_image = team==0? 'images/Glass_button_blue.svg': 'images/Glass_button_red.svg';
+    let { team, koolie_count } = $props<{ team: number, koolie_count: number }>();
+    let background_image = $derived(`images/Glass_button_${team === 0 ? 'blue' : 'red'}.svg`);
 </script>
 
 <div class="kooliebar">

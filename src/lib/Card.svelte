@@ -2,22 +2,18 @@
     const { card, rotation = 0, translation = 0, scale = 15 } = $props();
 
     const suits = new Map<string, number>([['C', 0],['D', 1],['H', 2],['S', 3]]);
-    const ranks = new Map<string, number>([['0', 0],['A', 1],['2', 2],['3', 3],['4', 4],
-        ['5', 5],['6', 6],['7', 7],['8', 8],['9', 9],['10', 10],['J', 11],['Q', 12],['K', 13]]);
-
+    const ranks = new Map<string, number>([['0', 0],['A', 1],['2', 2],['3', 3],['4', 4],['5', 5],['6', 6],['7', 7],['8', 8],['9', 9],['10', 10],['J', 11],['Q', 12],['K', 13]]);
     const suit = suits.get(card[0]);
     const rank = ranks.get(card.slice(1));
     const isValidCard = suit !== undefined && rank !== undefined;
-
     if (!isValidCard) {
         console.error(`Invalid card ${card}`);
     }
 
+    let windowHeight = $state<number>();
     const pngCardHeight = 94;
     const pngCardWidth = 69;
     const aspectRatio = pngCardWidth / pngCardHeight;
-
-    let windowHeight = $state<number>();
     const card_height = $derived(Math.max(pngCardHeight, ((windowHeight ?? 0) * scale / 100)));
     const card_width = $derived(card_height * aspectRatio);
 
