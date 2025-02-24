@@ -1,6 +1,6 @@
 <script lang="ts">
     import { SUITS, RANKS, CARDHEIGHT, CARDWIDTH, ASPECTRATIO, BACKGROUNDHEIGHT, BACKGROUNDWIDTH } from './Constants';
-    const { card, rotation = 0, translation = 0, scale = 15 } = $props();
+    const { card, oncardplayed, rotation = 0, translation = 0, scale = 15 } = $props();
 
     const suit = SUITS.get(card[0]);
     const rank = RANKS.get(card.slice(1));
@@ -31,7 +31,7 @@
         class="card"
         role="button"
         tabindex="0"
-        onclick={() => alert(card)}
+        onclick={oncardplayed}
         onkeydown={() => {}}
         aria-label={`${card} playing card`}
         style="--card-height: {card_dim.height}px;
@@ -39,7 +39,8 @@
                --background-size: {background_dim.size};
                --background-position: {background_dim.position};
                --rotation: rotate({rotation}deg);
-               --translation: {translation}px;">
+               --translation: {translation}px;
+               --aspect_ratio: {ASPECTRATIO};">
     </div>
 {:else}
     <div class="error" role="alert">Invalid card {card}</div>
@@ -55,7 +56,7 @@
         --element-width: 0px;
         left: calc(55% - (var(--card-width))/2);
         height: var(--card-height);
-        aspect-ratio: 69 / 94;
+        aspect-ratio: var(--aspect_ratio);
         background-image: url("/images/cards.png");
         background-size: var(--background-size);
         background-position: var(--background-position);
