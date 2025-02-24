@@ -14,7 +14,7 @@
       koolie_count: 8,
     }
 
-    const cards = ['H0', 'H10', 'CA', 'C5', 'D3', 'H2', 'SJ', 'C0'];
+    const cards = ['H0', 'H10', 'CA', 'CA', 'D3', 'CA', 'H2', 'SJ', 'C0'];
   
   </script>
   

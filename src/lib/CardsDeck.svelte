@@ -2,20 +2,28 @@
     import Card from "./Card.svelte";
     let { cards, scale = 17, percardrotation = 13, percardtranslation = 14 } = $props<{ cards: string[], scale?: number, percardrotation?: number, percardtranslation?: number }>();
 
-    function playCard(card: string) {
-        const i = cards.indexOf(card) ;
-        if (i !== -1) {
-            cards = cards.filter((c: string) => c !== card);
-            console.log(`removed card ${card}, remaining cards ${cards}`);
-        }
-    }
+    // The array of card data to use in the markup
+    let cardsData: { card: string; rotation: number; translation: number; oncardplayed: () => void }[] = $state([]);
+
+    // Instead of using indexOf which fails with duplicates,
+    // we recalc each card's properties based on its array index.
+    $effect(() => {
+        cardsData = cards.map((card: string, index: number) => ({
+            card,
+            rotation: percardrotation * (index - (cards.length - 1) / 2),
+            translation: percardtranslation * (index - (cards.length - 1) / 2),
+            oncardplayed: () => {
+                cards = [...cards.slice(0, index), ...cards.slice(index + 1)];
+                console.log(`removed card at index ${index}, remaining cards ${cards}`);
+            }
+        }));
+    });
+
 </script>
 
 <div class="deck">
-    {#each cards as card (card)}
-        <Card {card} oncardplayed={() => { playCard(card);}} {scale} 
-            rotation={percardrotation * (cards.indexOf(card) - (cards.length - 1) / 2)} 
-            translation={percardtranslation * (cards.indexOf(card) - (cards.length - 1) / 2)} />
+    {#each cardsData as { card, rotation, translation, oncardplayed }, index (card + '-' + index)}
+        <Card {card} {scale} {rotation} {translation} oncardplayed={oncardplayed} />
     {/each}
 </div>
 
@@ -24,7 +32,5 @@
         position: relative;
         height: 22vh;
         aspect-ratio: 2;
-        /* background-color: DodgerBlue;
-        border: 1px solid white; */
     }
 </style>
