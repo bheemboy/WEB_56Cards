@@ -1,27 +1,27 @@
 <script lang="ts">
+    import { SUITS, RANKS, CARDHEIGHT, CARDWIDTH, ASPECTRATIO, BACKGROUNDHEIGHT, BACKGROUNDWIDTH } from './Constants';
     const { card, rotation = 0, translation = 0, scale = 15 } = $props();
 
-    const suits = new Map<string, number>([['C', 0],['D', 1],['H', 2],['S', 3]]);
-    const ranks = new Map<string, number>([['0', 0],['A', 1],['2', 2],['3', 3],['4', 4],['5', 5],['6', 6],['7', 7],['8', 8],['9', 9],['10', 10],['J', 11],['Q', 12],['K', 13]]);
-    const suit = suits.get(card[0]);
-    const rank = ranks.get(card.slice(1));
+    const suit = SUITS.get(card[0]);
+    const rank = RANKS.get(card.slice(1));
     const isValidCard = suit !== undefined && rank !== undefined;
-    if (!isValidCard) {
-        console.error(`Invalid card ${card}`);
-    }
+    if (!isValidCard) console.error(`Invalid card ${card}`);
 
     let windowHeight = $state<number>();
-    const pngCardHeight = 94;
-    const pngCardWidth = 69;
-    const aspectRatio = pngCardWidth / pngCardHeight;
-    const card_height = $derived(Math.max(pngCardHeight, ((windowHeight ?? 0) * scale / 100)));
-    const card_width = $derived(card_height * aspectRatio);
+    let card_dim = $state({ height: CARDHEIGHT, width: CARDWIDTH });
+    let background_dim = $state({ size: `${BACKGROUNDHEIGHT}px ${BACKGROUNDWIDTH}px`, position: '0px 0px'});
 
-    const background_scale_ratio = $derived(card_height / pngCardHeight);
-    const background_size = $derived(`${966 * background_scale_ratio}px ${376 * background_scale_ratio}px`);
-    const bgPositionY = $derived(isValidCard ? -1 * suit * pngCardHeight * background_scale_ratio : 0);
-    const bgPositionX = $derived(isValidCard ? -1 * rank * pngCardWidth * background_scale_ratio : 0);
-    const background_position = $derived(`${bgPositionX}px ${bgPositionY}px`);
+    $effect(() => {
+        card_dim.height = Math.max(CARDHEIGHT, ((windowHeight ?? 0) * scale / 100));
+        card_dim.width = card_dim.height * ASPECTRATIO;
+
+        const background_scale_ratio = card_dim.height / CARDHEIGHT;
+        const bgPositionY = isValidCard ? -1 * suit * CARDHEIGHT * background_scale_ratio : 0;
+        const bgPositionX = isValidCard ? -1 * rank * CARDWIDTH * background_scale_ratio : 0;
+        background_dim.size = `${BACKGROUNDHEIGHT * background_scale_ratio}px ${BACKGROUNDWIDTH * background_scale_ratio}px`;
+        background_dim.position = `${bgPositionX}px ${bgPositionY}px`;
+    });
+
 </script>
 
 <svelte:window bind:innerHeight={windowHeight} />
@@ -34,10 +34,10 @@
         onclick={() => alert(card)}
         onkeydown={() => {}}
         aria-label={`${card} playing card`}
-        style="--card-height: {card_height}px;
-               --card-width: {card_width}px;
-               --background-size: {background_size};
-               --background-position: {background_position};
+        style="--card-height: {card_dim.height}px;
+               --card-width: {card_dim.width}px;
+               --background-size: {background_dim.size};
+               --background-position: {background_dim.position};
                --rotation: rotate({rotation}deg);
                --translation: {translation}px;">
     </div>
