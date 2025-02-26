@@ -1,5 +1,5 @@
 # Use the following commands to build and push
-# docker build -t bheemboy/web_56cards:latest -t bheemboy/web_56cards:2025.02.25 .
+# docker build -t bheemboy/web_56cards:latest -t bheemboy/web_56cards:$(Get-Date -Format "yyyy.MM.dd") .
 # docker push --all-tags bheemboy/web_56cards
 FROM bheemboy/api_56cards:latest
 

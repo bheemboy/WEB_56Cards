@@ -1,1 +1,0 @@
-docker run -d -p 80:80 -v .:\usr\share\nginx\html:ro -v .\nginx.conf:/etc/nginx/nginx.conf:ro nginx
