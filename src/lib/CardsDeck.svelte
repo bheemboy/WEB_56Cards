@@ -1,5 +1,6 @@
 <script lang="ts">
     import Card from "./Card.svelte";
+
     let { cards, scale = 17, percardrotation = 13, percardtranslation = 14 } = $props<{ cards: string[], scale?: number, percardrotation?: number, percardtranslation?: number }>();
 
     // The array of card data to use in the markup
@@ -18,12 +19,13 @@
             }
         }));
     });
-
 </script>
 
 <div class="deck">
     {#each cardsData as { card, rotation, translation, oncardplayed }, index (card + '-' + index)}
-        <Card {card} {scale} {rotation} {translation} oncardplayed={oncardplayed} />
+        <div>
+            <Card {card} {scale} {rotation} {translation} oncardplayed={oncardplayed} />
+        </div>
     {/each}
 </div>
 
