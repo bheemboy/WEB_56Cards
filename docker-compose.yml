@@ -1,29 +1,7 @@
-version: "3.8"
 services:
-  Cards56Hub:
-    image: bheemboy/api_56cards
-    container_name: api_56cards
-    ports:
-      - 8080:80
-
-  nginx:
-    restart: always
-    image: nginx:1-alpine
+  web_56cards:
+    image: bheemboy/web_56cards
+    container_name: web_56cards
+    restart: unless-stopped
     ports:
       - 80:80
-    volumes:
-      - ./wwwroot/:/var/www/html
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      # - /home/rehman/56cards/wwwroot/:/var/www/html
-      # - /home/rehman/56cards/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - Cards56Hub
-    networks:
-      default:
-      # pub_net:
-      #   ipv4_address: 192.168.1.203
-      
-# networks:
-#   pub_net:
-#     driver: macvlan
-#     external: true
