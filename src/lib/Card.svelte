@@ -34,13 +34,20 @@
         onclick={oncardplayed}
         onkeydown={() => {}}
         aria-label={`${card} playing card`}
-        style="--card-height: {card_dim.height}px;
-               --card-width: {card_dim.width}px;
-               --background-size: {background_dim.size};
-               --background-position: {background_dim.position};
-               --rotation: rotate({rotation}deg);
-               --translation: {translation}px;
-               --aspect_ratio: {ASPECTRATIO};">
+        
+        style:top = "9%"
+        style:left = "calc(55% - {card_dim.width/2}px)"
+        style:height = "{card_dim.height}px"
+        style:aspect-ratio = {ASPECTRATIO}
+        
+        style:background-image = 'url("/images/cards.png")'
+        style:background-size = {background_dim.size}
+        style:background-position = {background_dim.position}
+
+        style:transform-origin = "30% 100%"
+        style:transform = "rotate({rotation}deg)"
+        style:translate = "{translation}px"
+        style:transition = "top 0.1s ease-out">
     </div>
 {:else}
     <div class="error" role="alert">Invalid card {card}</div>
@@ -52,18 +59,7 @@
         border: none;
         outline: none;
         padding: 0;
-        top: 9%;
         --element-width: 0px;
-        left: calc(55% - (var(--card-width))/2);
-        height: var(--card-height);
-        aspect-ratio: var(--aspect_ratio);
-        background-image: url("/images/cards.png");
-        background-size: var(--background-size);
-        background-position: var(--background-position);
-        transform-origin: 30% 100%;
-        transform: var(--rotation);
-        translate: var(--translation);
-        transition: top 0.1s ease-out;
     }
     .card:hover {
         top: 7%;
