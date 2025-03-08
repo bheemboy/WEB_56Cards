@@ -9,8 +9,16 @@ export class GameService {
   public error = writable<string>("");
 
   constructor() {
+    let cards56Hub = '/Cards56Hub';
+
+    if (window.location.pathname.startsWith('file:///') || 
+        window.location.pathname.startsWith('http://localhost') || 
+        window.location.pathname.startsWith('https://localhost')) {
+      cards56Hub = 'http://localhost:8080/Cards56Hub';
+    }
+  
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("https://api-56cards.azurewebsites.net/gameHub")
+      .withUrl(cards56Hub)
       .build();
 
     this.setupHubEvents();

@@ -37,7 +37,9 @@ class GamePanel
 
         // Setup websocket connection
         this.targeturl =  '/Cards56Hub';
-        if (window.location.href.startsWith('file:///')) {
+        if (window.location.href.startsWith('file:///') || 
+            window.location.href.startsWith('http://localhost') || 
+            window.location.href.startsWith('https://localhost')) {
             this.targeturl = 'http://localhost:8080/Cards56Hub';
         }
         this.hubConnection = new signalR.HubConnectionBuilder().withUrl(this.targeturl).build();
