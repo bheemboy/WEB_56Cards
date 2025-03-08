@@ -35,11 +35,10 @@
         onkeydown={() => {}}
         aria-label={`${card} playing card`}
         
-        style:top = "9%"
         style:left = "calc(55% - {card_dim.width/2}px)"
         style:height = "{card_dim.height}px"
         style:aspect-ratio = {ASPECTRATIO}
-        
+
         style:background-image = 'url("/images/cards.png")'
         style:background-size = {background_dim.size}
         style:background-position = {background_dim.position}
@@ -59,6 +58,7 @@
         border: none;
         outline: none;
         padding: 0;
+        top: 9%;
         --element-width: 0px;
     }
     .card:hover {
