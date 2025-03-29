@@ -1,31 +1,42 @@
+<!-- Table.svelte -->
 <script lang="ts">
-    import CardsDeck from "../lib/CardsDeck.svelte";
-    import Koolies from "../lib/Koolies.svelte";
-    import Avatar from "../lib/Avatar.svelte";
+  import { onMount } from 'svelte';
+  import { loginParams } from "../lib/Types.svelte";
+  
+  // Use $effect for side effects like fetching data or reacting to prop changes
+  // onMount is still fine for initial setup run once after component mounts
+  onMount(() => {
+    // Parse URL parameters
+    const rawParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(
+        Array.from(rawParams.entries()).map(([key, value]) => [
+            key.toLowerCase(), 
+            // Convert lang and watch parameter values to lowercase
+            key.toLowerCase() === 'lang' || key.toLowerCase() === 'watch' 
+                ? value.toLowerCase() 
+                : value
+        ])
+    );
+    // console.log("params:", params);
     
-    let t0 = $state(0);
+    // Update loginParams
+    loginParams.userName = params.username ?? loginParams.userName
+    loginParams.tableType = params.tabletype ?? loginParams.tableType
+    loginParams.tableName = params.tablename ?? loginParams.tableName
+    loginParams.language = params.lang ?? loginParams.language
+    loginParams.watch = params.watch === 'true' ? true : loginParams.watch
+  });
 
-    const team0 = {
-      team: 0,
-      koolie_count: 3,
-    }
-    const team1 = {
-      team: 1,
-      koolie_count: 8,
-    }
+  $effect(() => {
+    console.log("loginParams changed:", loginParams);
+  });
+  
+</script>
 
-    const cards = ['H0', 'H10', 'CA', 'CA', 'D3', 'CA', 'H2', 'SJ', 'C0'];
-  
-  </script>
-  
-  <div>
-      <Koolies {...team0} />
-      <CardsDeck {cards}/>
-      <Koolies {...team1} />
-      <Avatar team={t0} />
-      <Avatar team={1} />
+<div class="table-container">
 
-      <button onclick={() => t0 = t0 === 0 ? 1 : 0}>Toggle Avatar</button>
-      
-    </div>
-  
+</div>
+
+<style>
+  /* ... */
+</style>

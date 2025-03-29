@@ -1,4 +1,3 @@
-// Move these outside the component to avoid recreating them on each render
 export const SUITS = Object.freeze(new Map([['C', 0], ['D', 1], ['H', 2], ['S', 3]]));
 export const RANKS = Object.freeze(new Map([
   ['0', 0], ['A', 1], ['2', 2], ['3', 3], ['4', 4],

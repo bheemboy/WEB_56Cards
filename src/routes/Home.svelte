@@ -1,27 +1,14 @@
 <script lang="ts">
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
-
-  interface GameSettings {
-    userName: string;
-    tableType: string;
-    tableName: string;
-    language: string;
-  }
-
-  let settings = $state<GameSettings>({
-    userName: "",
-    tableType: "0",
-    tableName: "",
-    language: "ml"
-  });
+  import { loginParams } from "../lib/Types.svelte";
 
   onMount(() => {
-    const savedSettings = localStorage.getItem("56cards_settings");
+    const savedSettings = localStorage.getItem("56cards_last_login_params");
     if (savedSettings) {
       try {
-        const loaded: GameSettings = JSON.parse(savedSettings);
-        settings = { ...settings, ...loaded };
+        const loaded = JSON.parse(savedSettings);
+        Object.assign(loginParams, loaded);
       } catch (e) {
         console.error("Error loading saved settings:", e);
       }
@@ -29,14 +16,14 @@
   });
 
   function playGame(watch = false) {
-    if (!settings.userName) {
+    if (!loginParams.userName) {
       alert("Please enter your name before joining the game");
       return;
     }
     
-    localStorage.setItem("56cards_settings", JSON.stringify(settings));
+    localStorage.setItem("56cards_last_login_params", JSON.stringify(loginParams));
     
-    navigate(`/table?username=${settings.userName}&tabletype=${settings.tableType}&tablename=${settings.tableName}&lang=${settings.language}&watch=${watch}`);
+    navigate(`/table?username=${loginParams.userName}&tabletype=${loginParams.tableType}&tablename=${loginParams.tableName}&lang=${loginParams.language}&watch=${watch}`);
   }
 </script>
 
@@ -56,7 +43,7 @@
         <input 
           id="userName"
           type="text" 
-          bind:value={settings.userName} 
+          bind:value={loginParams.userName} 
           placeholder="Enter your name"
           required
         />
@@ -65,7 +52,7 @@
       <div class="form-group">
         <label for="tableType">Table Size</label>
         <div class="select-wrapper">
-          <select id="tableType" bind:value={settings.tableType}>
+          <select id="tableType" bind:value={loginParams.tableType}>
             <option value="0">4 Players</option>
             <option value="1">6 Players</option>
             <option value="2">8 Players</option>
@@ -78,7 +65,7 @@
         <input 
           id="tableName"
           type="text" 
-          bind:value={settings.tableName} 
+          bind:value={loginParams.tableName} 
           placeholder="Leave empty for random table"
         />
       </div>
@@ -86,7 +73,7 @@
       <div class="form-group">
         <label for="language">Language</label>
         <div class="select-wrapper">
-          <select id="language" bind:value={settings.language}>
+          <select id="language" bind:value={loginParams.language}>
             <option value="en">English</option>
             <option value="ml">Malayalam</option>
           </select>
