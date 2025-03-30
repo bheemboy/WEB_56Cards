@@ -1,7 +1,7 @@
 <script lang="ts">
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
-  import { loginParams } from "../lib/Types.svelte";
+  import { loginParams } from "../lib/LoginParams.svelte";
 
   onMount(() => {
     const savedSettings = localStorage.getItem("56cards_last_login_params");

@@ -1,5 +1,3 @@
-// types/gameTypes.ts
-
 // Svelete rune for storing last login and table's query params 
 export const loginParams = $state({
   userName: "",
@@ -8,4 +6,3 @@ export const loginParams = $state({
   language: "ml",
   watch: false
 });
-

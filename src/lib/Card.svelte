@@ -1,6 +1,7 @@
 <script lang="ts">
     import { SUITS, RANKS, CARDHEIGHT, CARDWIDTH, ASPECTRATIO, BACKGROUNDHEIGHT, BACKGROUNDWIDTH } from './Constants';
-    const { card, scale, rotation, translation, oncardplayed} = $props();
+    import type { CardProps } from './Types';
+    const {card, scale, rotation, translation, oncardplayed}: CardProps = $props();
 
     const suit = SUITS.get(card[0]);
     const rank = RANKS.get(card.slice(1));
