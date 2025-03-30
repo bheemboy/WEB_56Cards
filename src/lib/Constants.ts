@@ -9,3 +9,10 @@ export const CARDWIDTH = 69;
 export const ASPECTRATIO = CARDWIDTH / CARDHEIGHT; 
 export const BACKGROUNDHEIGHT = 966;
 export const BACKGROUNDWIDTH = 376;
+export const ConnectionState = {
+  DISCONNECTED: "disconnected",
+  CONNECTING: "connecting", 
+  CONNECTED: "connected",
+  RECONNECTING: "reconnecting",
+  FAILED: "failed"
+};
