@@ -2,8 +2,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { loginParams } from "../lib/LoginParams.svelte";
-  import { ConnectionState } from "../lib/Constants";
-  import { type Cards56Hub, cards56HubContextKey } from '../lib/Cards56Hub.svelte';
+  import { type Cards56Hub, ConnectionState, cards56HubContextKey } from '../lib/Cards56Hub.svelte';
 
   // Get the hub instance from the context
   const hub : Cards56Hub = getContext(cards56HubContextKey);

@@ -1,6 +1,12 @@
 <script lang="ts">
-    import type { CardProps, CardsDeckProps } from './Types';
-    import Card from "./Card.svelte";
+    import Card, {type CardProps} from "./Card.svelte";
+
+    export interface CardsDeckProps { 
+        cards: string[]
+        scale?: number 
+        percardrotation?: number 
+        percardtranslation?: number 
+    }
 
     let { cards, scale = 17, percardrotation = 13, percardtranslation = 14} : CardsDeckProps = $props();
 
