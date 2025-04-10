@@ -7,6 +7,14 @@
 
   // Get the hub instance from the context
   const hub : Cards56Hub = getContext(cards56HubContextKey);
+  
+  // Initial connection - register user
+  hub.connect().then(() => {
+      // hub.invoke("RegisterUser", userId);
+      console.log("Register User");
+  }).catch((error) => {
+      console.error("Error connecting to hub:", error);
+  });
 
   // Use $effect for side effects like fetching data or reacting to prop changes
   // onMount is still fine for initial setup run once after component mounts
@@ -31,6 +39,12 @@
     loginParams.watch = params.watch === 'true' ? true : loginParams.watch
   });
 
+  $effect(() => {
+    if (hub.connectionState === ConnectionState.CONNECTED) {
+      console.log("hub.connectionState = CONNECTED");
+    }
+  });
+
   // $effect(() => {
   //   console.log("loginParams changed:", $state.snapshot(loginParams));
   // });
@@ -50,8 +64,8 @@
     <div class="status-indicator disconnected">Disconnected</div>
   {/if}
 
-  <input type="button" value="Connect" on:click={() => hub.connect()} />
-  <input type="button" value="Disconnect" on:click={() => hub.disconnect()} />
+  <input type="button" value="Connect" onclick={() => hub.connect()} />
+  <input type="button" value="Disconnect" onclick={() => hub.disconnect()} />
 </div>
 
 <style>

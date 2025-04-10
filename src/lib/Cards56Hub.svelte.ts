@@ -27,7 +27,7 @@ export class Cards56Hub {
       .build();
 
     this.registerConnectionHandlers();
-    
+
     // Connect automatically
     this.connect().catch(err => {
       console.error("Initial connection failed:", err);
@@ -35,7 +35,7 @@ export class Cards56Hub {
     });
   }
 
-  private registerConnectionHandlers(): void {
+  private registerConnectionHandlers(): void {    
     this._hubConnection.onreconnecting((error) => {
       this._connectionState = ConnectionState.RECONNECTING;
       console.log("Connection lost. Attempting to reconnect...", error);
