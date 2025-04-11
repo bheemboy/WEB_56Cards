@@ -1,5 +1,5 @@
 <script lang="ts">
-    const { team = 0, scale = 8 } = $props<{team: number, scale: number}>();
+    const { team = 0, scale = 8 } = $props<{team?: number, scale?: number}>();
     
     let windowHeight = $state(0);
     const image_url = $derived(`/images/person-${team === 0 ? 'blue' : 'red'}.png`);
