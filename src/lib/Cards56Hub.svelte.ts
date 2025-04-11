@@ -32,6 +32,7 @@ export interface Player {
   playerID: string;
   name: string;
   lang: string;
+  tableName: string;
   watchOnly: boolean;
 }
 
@@ -169,9 +170,14 @@ export class Cards56Hub {
       console.log("Player registered with ID:", player.playerID);
       
       // Automatically join table after registration completes
-      this.joinTable()
-        .then(() => console.log("Automatically joined table after registration"))
-        .catch(error => console.error("Error auto-joining table:", error));
+      if (!player.tableName) {
+        this.joinTable()
+          .then(() => console.log("Automatically joined table after registration"))
+          .catch(error => console.error("Error auto-joining table:", error));
+      }
+      else {
+        console.log("Skipping jointable. Player already on table: ", player.tableName);
+      }
     });
   }
 
