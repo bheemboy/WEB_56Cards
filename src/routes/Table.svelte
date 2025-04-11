@@ -2,21 +2,11 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { loginParams } from "../lib/LoginParams.svelte";
-  import { type Cards56Hub, ConnectionState, cards56HubContextKey } from '../lib/Cards56Hub.svelte';
+  import { type Cards56Hub, type ErrorCallback, type StateUpdatedCallback, ConnectionState, cards56HubContextKey } from '../lib/Cards56Hub.svelte';
 
   // Get the hub instance from the context
   const hub : Cards56Hub = getContext(cards56HubContextKey);
   
-  // Initial connection - register user
-  hub.connect().then(() => {
-      // hub.invoke("RegisterUser", userId);
-      console.log("Register User");
-  }).catch((error) => {
-      console.error("Error connecting to hub:", error);
-  });
-
-  // Use $effect for side effects like fetching data or reacting to prop changes
-  // onMount is still fine for initial setup run once after component mounts
   onMount(() => {
     // Parse URL parameters
     const rawParams = new URLSearchParams(window.location.search);
@@ -37,16 +27,17 @@
     loginParams.language = params.lang ?? loginParams.language
     loginParams.watch = params.watch === 'true' ? true : loginParams.watch
   });
-
+  
+  // Use effect to handle player registration when connection state changes
+  // the $effect() block runs once initially after the component is set up
+  // And then everytime the hub.connectionState changes
   $effect(() => {
     if (hub.connectionState === ConnectionState.CONNECTED) {
-      console.log("hub.connectionState = CONNECTED");
+      hub.registerPlayer().catch(error => {
+        console.error("Failed to register player:", error);
+      });
     }
   });
-
-  // $effect(() => {
-  //   console.log("loginParams changed:", $state.snapshot(loginParams));
-  // });
 
 </script>
 

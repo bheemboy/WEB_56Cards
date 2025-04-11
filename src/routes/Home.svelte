@@ -81,10 +81,10 @@
       </div>
             
       <div class="action-buttons">
-        <button type="button" class="play-btn" onclick={() => playGame(true)}>
+        <button type="button" class="play-btn" onclick={() => playGame(false)}>
           Play Game
         </button>
-        <button type="button" class="watch-btn" onclick={() => playGame(false)}>
+        <button type="button" class="watch-btn" onclick={() => playGame(true)}>
           Watch Game
         </button>
       </div>
