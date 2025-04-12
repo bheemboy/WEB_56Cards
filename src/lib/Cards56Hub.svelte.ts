@@ -7,18 +7,12 @@ class CustomRetryPolicy implements signalR.IRetryPolicy {
     let retryDelay = null;
     if (retryContext.previousRetryCount === 0) {
       retryDelay = 0;
-    } else if (retryContext.previousRetryCount <= 10) {
+    } else if (retryContext.previousRetryCount < 10) {
       retryDelay = 1000;
-    } else if (retryContext.previousRetryCount <= 20) {
+    } else if (retryContext.previousRetryCount < 20) {
       retryDelay = 2000;
-    } else if (retryContext.previousRetryCount <= 29) {
+    } else if (retryContext.previousRetryCount < 30) {
       retryDelay = 5000;
-    }
-
-    if (retryDelay) {
-      alertStoreInstance.showError(`Reconnection attempt #${retryContext.previousRetryCount} failed. Retrying in ${retryDelay/1000} seconds...`, "Connection lost: ", 0);
-    } else {
-      alertStoreInstance.showError(`Could not reconnect to server after ${retryContext.previousRetryCount} attempts.`, "Fatal error: ", 0);
     }
     return retryDelay;
   }
@@ -115,7 +109,8 @@ export class Cards56Hub {
 
   private registerConnectionHandlers(): void {    
     this._hubConnection.onreconnecting((error?: Error) => {
-      this._connectionState = ConnectionState.RECONNECTING;      
+      this._connectionState = ConnectionState.RECONNECTING;
+      this._alertStore.showError("Connection to game server lost. Reconnecting...", "", 0);
       if (error) {
         console.error("Connection lost. Attempting to reconnect...", error);
       }
@@ -129,9 +124,8 @@ export class Cards56Hub {
 
     this._hubConnection.onclose((error) => {
       this._connectionState = ConnectionState.DISCONNECTED;
+      this._alertStore.showError(`Connection to game server closed`, "Fatal error: ", 0);
       if (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        this._alertStore.showError(`Connection closed with error: ${errorMessage}`, "Disconnected", 0);
         console.error('Connection closed with error:', error);
       } else {
         console.info('Connection closed.');
@@ -171,10 +165,8 @@ export class Cards56Hub {
       if (!player.tableName) {
         // Inlined joinTable logic (previously a private method)
         this._hubConnection.invoke("JoinTable", parseInt(loginParams.tableType), loginParams.tableName)
-          .then(() => console.info("Automatically joined table after registration"))
+          .then(() => console.info("Automatically invoked JoinTable after registration"))
           .catch(error => {
-            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            this._alertStore.showError(`Error joining table: ${errorMessage}`, "Join Table Failed");
             console.error("Error invoking JoinTable:", error);
           });
       }
@@ -191,6 +183,7 @@ export class Cards56Hub {
       try {
         this._connectionState = ConnectionState.CONNECTING;
         console.info("Attempting to connect to SignalR hub...");
+        this._alertStore.showInfo("Connecting to game server...");
         await this._hubConnection.start();
         this._connectionState = ConnectionState.CONNECTED;
         console.info("Connected to 56cards websocket!");
@@ -214,7 +207,6 @@ export class Cards56Hub {
       } catch (err: unknown) {
         this._connectionState = ConnectionState.FAILED;
         const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        this._alertStore.showError(`Error disconnecting: ${errorMessage}`, "Disconnect Failed", 0);
         console.error("Error stopping connection:", err);
         throw err; // Re-throw error
       }
@@ -241,8 +233,6 @@ export class Cards56Hub {
       );
       // Note: No need to handle registration completion here, it's handled by the event handler
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Registration error: ${errorMessage}`, "Registration Failed");
       console.error("Error invoking RegisterPlayer:", error);
       throw error;
     }
@@ -252,8 +242,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("PlaceBid", bid);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error placing bid: ${errorMessage}`, "Bid Failed");
       console.error("Error invoking PlaceBid:", error);
       throw error;
     }
@@ -263,8 +251,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("PassBid");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error passing bid: ${errorMessage}`, "Pass Failed");
       console.error("Error invoking PassBid:", error);
       throw error;
     }
@@ -274,8 +260,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("SelectTrump", card);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error selecting trump: ${errorMessage}`, "Trump Selection Failed");
       console.error("Error invoking SelectTrump:", error);
       throw error;
     }
@@ -285,8 +269,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("PlayCard", card, roundOverDelay);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error playing card: ${errorMessage}`, "Play Card Failed");
       console.error("Error invoking PlayCard:", error);
       throw error;
     }
@@ -296,8 +278,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("ShowTrump", roundOverDelay);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error showing trump: ${errorMessage}`, "Show Trump Failed");
       console.error("Error invoking ShowTrump:", error);
       throw error;
     }
@@ -307,8 +287,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("StartNextGame");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error starting next game: ${errorMessage}`, "Start Game Failed");
       console.error("Error invoking StartNextGame:", error);
       throw error;
     }
@@ -318,8 +296,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("RefreshState");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error refreshing state: ${errorMessage}`, "Refresh Failed");
       console.error("Error invoking RefreshState:", error);
       throw error;
     }
@@ -329,8 +305,6 @@ export class Cards56Hub {
     try {
       await this._hubConnection.invoke("ForfeitGame");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      this._alertStore.showError(`Error forfeiting game: ${errorMessage}`, "Forfeit Failed");
       console.error("Error invoking ForfeitGame:", error);
       throw error;
     }
