@@ -2,8 +2,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { loginParams } from "../lib/LoginParams.svelte";
-  import { type Cards56Hub, ConnectionState, cards56HubContextKey} from '../lib/Cards56Hub.svelte';
-  import Alert from '../lib/Alert.svelte';
+  import { type Cards56Hub, ConnectionState, cards56HubContextKey } from '../lib/Cards56Hub.svelte';
   import Avatar from '../lib/Avatar.svelte';
 
   // Get the hub instance from the context
@@ -35,40 +34,20 @@
   // And then everytime the hub.connectionState changes
   $effect(() => {
     if (hub.connectionState === ConnectionState.CONNECTED) {
-      hub.registerPlayer().catch(error => {
-        console.error("Failed to register player:", error);
+      hub.registerPlayer().catch(() => {
+        // Errors are now handled by the hub itself with alerts
       });
     }
   });
-
 </script>
 
 <div class="table-container">
-  {#if hub.connectionState === ConnectionState.CONNECTING}
-    <Alert type="info" title="Connecting" message="Attempting to connect to https://play.56cards.com/Cards56Hub ..." dismissible={true} duration = {0}/>
-  {:else if hub.connectionState === ConnectionState.RECONNECTING}
-    <Alert type="info" title="Reconnecting" message="Attempting to reconnect to https://play.56cards.com/Cards56Hub ..." dismissible={true} duration = {0}/>
-  <!--
-  {:else if hub.connectionState === ConnectionState.CONNECTED}
-      <Alert type="success" title="Connected" message="You are now connected to the server." dismissible={true}/>
-  -->
-  {:else if hub.connectionState === ConnectionState.FAILED}
-    <Alert type="danger" title="Connection Failed" message="Cannot connect to https://play.56cards.com/Cards56Hub." dismissible={true} duration = {0}/>
-  {:else if hub.connectionState === ConnectionState.DISCONNECTED}
-    <Alert type="danger" title="Disconnected" message="" dismissible={true} duration = {0}/>
-  {/if}
-
-  <!-- <input type="button" value="Connect" onclick={() => hub.connect()} />
-  <input type="button" value="Disconnect" onclick={() => hub.disconnect()} /> -->
-
   <div class="avatar-container">
     <Avatar team={1} />
   </div>
 </div>
 
 <style>
-  /* ... */
-
   .avatar-container {
     margin: 1rem;
     display: flex;

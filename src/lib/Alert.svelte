@@ -1,83 +1,75 @@
+<!-- Alert.svelte -->
 <script lang="ts">
-  // Alert.svelte
-  import { onMount } from 'svelte';
-
-  const { 
-    type = "warning", 
-    title = "",
-    message = "",
-    dismissible = true,
-    duration = 3000, // Duration in ms before auto-dismissal
-    showDelay = 500, // Delay in ms before showing the alert
-    show = true
-  } = $props<{
-    type?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark",
-    title?: string,
-    message: string,
-    dismissible?: boolean,
-    duration?: number,
-    showDelay?: number,
-    show?: boolean
-  }>();
-
-  let visible = $state(false); // Start with visible false
-  let shouldShow = $state(show);
-  let dismissTimer: number | undefined;
-  let showTimer: number | undefined;
+  import { onDestroy } from 'svelte';
+  import { alertStoreInstance } from './AlertStore.svelte';
+  
+  // Get the alert instance directly
+  const alertStore = alertStoreInstance;
+  
+  // Create a reactive variable to track the alert state
+  let visible = $state(false);
+  let dismissTimer: ReturnType<typeof setTimeout> | undefined;
+  let showTimer: ReturnType<typeof setTimeout> | undefined;
 
   function dismissAlert() {
-    shouldShow = false;
     visible = false;
+    clearTimers();
+    alertStore.hideAlert();
+  }
+
+  function clearTimers() {
     if (dismissTimer) {
       clearTimeout(dismissTimer);
+      dismissTimer = undefined;
     }
     if (showTimer) {
       clearTimeout(showTimer);
+      showTimer = undefined;
     }
   }
 
-  onMount(() => {
-    // Set timer to delay showing the alert
-    if (shouldShow) {
+  // Reactively watch the alert state
+  $effect(() => {
+    // Get the current state directly on each effect run
+    const currentState = alertStore.state;
+    
+    // Clear any existing timers
+    clearTimers();
+    
+    if (currentState.type === "hidden") {
+      visible = false;
+    } else {
+      // Show the alert
       showTimer = setTimeout(() => {
-        if (shouldShow) { // Double-check that we still want to show the alert
-          visible = true;
-          
-          // Set timer to auto-dismiss the alert after it becomes visible
-          if (duration > 0) {
-            dismissTimer = setTimeout(() => {
-              visible = false;
-              shouldShow = false;
-            }, duration);
-          }
+        visible = true;
+        
+        if (currentState.duration && currentState.duration > 0) {
+          dismissTimer = setTimeout(() => {
+            visible = false;
+            alertStore.hideAlert();
+          }, currentState.duration);
         }
-      }, showDelay);
+      }, currentState.showDelay || 250);
     }
-
-    return () => {
-      // Clean up both timers if component is destroyed
-      if (dismissTimer) {
-        clearTimeout(dismissTimer);
-      }
-      if (showTimer) {
-        clearTimeout(showTimer);
-      }
-    };
   });
+
+  onDestroy(clearTimers);
 </script>
 
-{#if visible}
-  <div class={`floating-alert alert alert-${type} ${dismissible ? 'alert-dismissible' : ''} fade show`} role="alert">
+{#if visible && alertStore.state.type !== "hidden"}
+  <div class={`floating-alert alert alert-${alertStore.state.type} ${alertStore.state.dismissible ? 'alert-dismissible' : ''} fade show`} role="alert">
     <div class="alert-content">
-      {#if title}
-        <strong>{title}</strong> {message}
-      {:else}
-        {message}
-      {/if}
+      {#if alertStore.state.title}<strong>{alertStore.state.title}</strong> {/if}
+      {#if alertStore.state.message}{alertStore.state.message}{/if}
     </div>
     
-    {#if dismissible}
-      <button type="button" class="close-button" onclick={dismissAlert} aria-label="Close">
+    {#if alertStore.state.dismissible !== false}
+      <button 
+        type="button" 
+        class="close-button" 
+        onclick={dismissAlert} 
+        aria-label="Close"
+      >
         <span class="close-icon">×</span>
       </button>
     {/if}
@@ -98,24 +90,24 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-right: 20px; /* Add extra padding on the right */
+    padding-right: 20px;
   }
 
   .alert {
-    padding: 0.5rem 1.25rem; /* Reduced top/bottom padding from 0.75rem to 0.5rem */
+    padding: 0.5rem 1.25rem;
     border: 1px solid transparent;
-    line-height: 1.2; /* Added to make text more compact */
+    line-height: 1.2;
   }
   
   .alert-content {
     flex-grow: 1;
-    font-size: 0.9rem; /* Slightly smaller font size */
+    font-size: 0.9rem;
   }
   
   .close-button {
     background-color: transparent;
     border: none;
-    padding: 0.25rem 1rem; /* Reduced top/bottom padding from 0.5rem to 0.25rem */
+    padding: 0.25rem 1rem;
     margin-right: 15px;
     font-size: 1.5rem;
     line-height: 1;
@@ -130,7 +122,7 @@
   
   .close-icon {
     font-weight: bold;
-    font-size: 1.3rem; /* Slightly smaller from 1.5rem */
+    font-size: 1.3rem;
   }
   
   .alert-warning {
