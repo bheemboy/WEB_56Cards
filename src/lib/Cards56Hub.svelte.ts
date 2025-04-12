@@ -2,9 +2,25 @@ import * as signalR from "@microsoft/signalr";
 import { loginParams } from "./LoginParams.svelte";
 import { alertStoreInstance } from "./AlertStore.svelte";
 
-class ForeverRetryPolicy implements signalR.IRetryPolicy {
-  nextRetryDelayInMilliseconds(_retryContext: signalR.RetryContext): number | null {
-    return 5000; // Always retry every 5 seconds
+class CustomRetryPolicy implements signalR.IRetryPolicy {
+  nextRetryDelayInMilliseconds(retryContext: signalR.RetryContext): number | null {
+    let retryDelay = null;
+    if (retryContext.previousRetryCount === 0) {
+      retryDelay = 0;
+    } else if (retryContext.previousRetryCount <= 10) {
+      retryDelay = 1000;
+    } else if (retryContext.previousRetryCount <= 20) {
+      retryDelay = 2000;
+    } else if (retryContext.previousRetryCount <= 29) {
+      retryDelay = 5000;
+    }
+
+    if (retryDelay) {
+      alertStoreInstance.showError(`Reconnection attempt #${retryContext.previousRetryCount} failed. Retrying in ${retryDelay/1000} seconds...`, "Connection lost: ", 0);
+    } else {
+      alertStoreInstance.showError(`Could not reconnect to server after ${retryContext.previousRetryCount} attempts.`, "Fatal error: ", 0);
+    }
+    return retryDelay;
   }
 }
 
@@ -82,7 +98,7 @@ export class Cards56Hub {
 
     this._hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(cards56Hub)
-      .withAutomaticReconnect(new ForeverRetryPolicy())
+      .withAutomaticReconnect(new CustomRetryPolicy())
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
@@ -92,17 +108,14 @@ export class Cards56Hub {
     // Connect automatically
     this.connect().catch((err: unknown) => {
       this._connectionState = ConnectionState.FAILED;
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      this._alertStore.showError(errorMessage, "Connection failed", 0);
+      this._alertStore.showError("Could not connect to Cards56Hub on server.", "Fatal error: ", 0);
       console.error("Failed to connect to SignalR hub:", err);
     });
   }
 
   private registerConnectionHandlers(): void {    
     this._hubConnection.onreconnecting((error?: Error) => {
-      this._connectionState = ConnectionState.RECONNECTING;
-      this._alertStore.showError("Attempting to reconnect...", "Connection lost", 0);
-      
+      this._connectionState = ConnectionState.RECONNECTING;      
       if (error) {
         console.error("Connection lost. Attempting to reconnect...", error);
       }
@@ -110,7 +123,7 @@ export class Cards56Hub {
 
     this._hubConnection.onreconnected((connectionId) => {
       this._connectionState = ConnectionState.CONNECTED;
-      this._alertStore.showSuccess("Reconnected successfully!", "", 1000);
+      this._alertStore.hideAlert();
       console.info("Connection reestablished. ConnectionId:", connectionId);
     });
 
