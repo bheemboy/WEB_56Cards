@@ -1,5 +1,5 @@
 <script lang="ts">
-  // FloatingAlert.svelte
+  // Alert.svelte
   import { onMount } from 'svelte';
 
   const { 
@@ -8,6 +8,7 @@
     message = "",
     dismissible = true,
     duration = 3000, // Duration in ms before auto-dismissal
+    showDelay = 500, // Delay in ms before showing the alert
     show = true
   } = $props<{
     type?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark",
@@ -15,31 +16,51 @@
     message: string,
     dismissible?: boolean,
     duration?: number,
+    showDelay?: number,
     show?: boolean
   }>();
 
-  let visible = $state(show);
+  let visible = $state(false); // Start with visible false
+  let shouldShow = $state(show);
   let dismissTimer: number | undefined;
+  let showTimer: number | undefined;
 
   function dismissAlert() {
+    shouldShow = false;
     visible = false;
     if (dismissTimer) {
       clearTimeout(dismissTimer);
     }
+    if (showTimer) {
+      clearTimeout(showTimer);
+    }
   }
 
   onMount(() => {
-    // Set timer to auto-dismiss the alert
-    if (duration > 0) {
-      dismissTimer = setTimeout(() => {
-        visible = false;
-      }, duration);
+    // Set timer to delay showing the alert
+    if (shouldShow) {
+      showTimer = setTimeout(() => {
+        if (shouldShow) { // Double-check that we still want to show the alert
+          visible = true;
+          
+          // Set timer to auto-dismiss the alert after it becomes visible
+          if (duration > 0) {
+            dismissTimer = setTimeout(() => {
+              visible = false;
+              shouldShow = false;
+            }, duration);
+          }
+        }
+      }, showDelay);
     }
 
     return () => {
-      // Clean up the timer if component is destroyed
+      // Clean up both timers if component is destroyed
       if (dismissTimer) {
         clearTimeout(dismissTimer);
+      }
+      if (showTimer) {
+        clearTimeout(showTimer);
       }
     };
   });

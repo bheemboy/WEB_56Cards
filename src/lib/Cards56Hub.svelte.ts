@@ -36,18 +36,11 @@ export interface Player {
   watchOnly: boolean;
 }
 
-export interface Card56ErrorData {
-  errorCode: number;
-  // Add other fields as needed
-}
-
 export interface ErrorInfo {
-  id: string;
   errorCode: number;
   hubMethodID: Cards56HubMethod;
   errorMessage: string;
-  errorData: Card56ErrorData;
-  timestamp: number;
+  errorData: any;
 }
 
 // Define a unique key for the context
@@ -58,8 +51,7 @@ export class Cards56Hub {
   private _connectionState = $state(ConnectionState.DISCONNECTED);
   private _playerId: string | null = null;
   private _gameState = $state<any>(null);
-  private _errors = $state<ErrorInfo[]>([]);
-  private _errorCleanupInterval: number | null = null;
+  private _error = $state<ErrorInfo>();
 
   public get connectionState() {
     return this._connectionState;
@@ -69,8 +61,8 @@ export class Cards56Hub {
     return this._gameState;
   }
 
-  public get errors() {
-    return this._errors;
+  public get error() {
+    return this._error;
   }
 
   // Static instance holder - create instance immediately
@@ -84,7 +76,7 @@ export class Cards56Hub {
   private constructor() {
     let cards56Hub = 'https://play.56cards.com/Cards56Hub';
     // let cards56Hub = '/Cards56Hub';
-
+  
     // if (window.location.hostname.toLowerCase() === 'localhost') {
     //   cards56Hub = 'http://localhost:8080/Cards56Hub';
     // }
@@ -97,7 +89,6 @@ export class Cards56Hub {
 
     this.registerConnectionHandlers();
     this.registerEventHandlers();
-    this.setupErrorCleanup();
 
     // Connect automatically
     this.connect().catch(err => {
@@ -129,21 +120,11 @@ export class Cards56Hub {
 
   private registerEventHandlers(): void {
     // Private handling of OnError events
-    this._hubConnection.on("OnError", (errorCode: number, hubMethodID: Cards56HubMethod, errorMessage: string, errorData: Card56ErrorData) => {
+    this._hubConnection.on("OnError", (errorCode: number, hubMethodID: Cards56HubMethod, errorMessage: string, errorData: any) => {
       console.error(`Hub Error (${Cards56HubMethod[hubMethodID]}): ${errorCode} - ${errorMessage}`, errorData);
       
-      // Add error to the state
-      const newError: ErrorInfo = {
-        id: crypto.randomUUID(), // Generate unique ID for each error
-        errorCode,
-        hubMethodID,
-        errorMessage,
-        errorData,
-        timestamp: Date.now()
-      };
-      
-      // Update errors array with new error
-      this._errors = [...this._errors, newError];
+      // Update error with new error
+      this._error = {errorCode, hubMethodID, errorMessage, errorData};
     });
 
     // Private handling of OnStateUpdated events
@@ -151,15 +132,9 @@ export class Cards56Hub {
       try {
         // Parse JSON state and update _gameState
         this._gameState = JSON.parse(jsonState);
-        console.log("Game state updated:", $state.snapshot(this._gameState));
+        // console.log("Game state updated:", $state.snapshot(this._gameState));
       } catch (error) {
         console.error("Error parsing game state JSON:", error);
-        this.addInternalError(
-          999, 
-          Cards56HubMethod.RefreshState, 
-          "Failed to parse game state JSON", 
-          { errorCode: 999 }
-        );
       }
     });
 
@@ -181,36 +156,6 @@ export class Cards56Hub {
     });
   }
 
-  // Method to add internal errors to the error state
-  private addInternalError(errorCode: number, hubMethodID: Cards56HubMethod, errorMessage: string, errorData: Card56ErrorData): void {
-    const newError: ErrorInfo = {
-      id: crypto.randomUUID(),
-      errorCode,
-      hubMethodID,
-      errorMessage,
-      errorData,
-      timestamp: Date.now()
-    };
-
-    this._errors = [...this._errors, newError];
-  }
-
-  // Setup interval to clean up errors older than 5 seconds
-  private setupErrorCleanup(): void {
-    this._errorCleanupInterval = window.setInterval(() => {
-      const now = Date.now();
-      const fiveSecondsAgo = now - 5000;
-      
-      // Keep only errors that are less than 5 seconds old
-      const filteredErrors = this._errors.filter(error => error.timestamp > fiveSecondsAgo);
-      
-      // Only update the state if there's a change
-      if (filteredErrors.length !== this._errors.length) {
-        this._errors = filteredErrors;
-      }
-    }, 1000); // Check every second
-  }
-
   // Connection methods
   async connect(): Promise<void> {
     // Check current state managed by $state
@@ -221,7 +166,6 @@ export class Cards56Hub {
         await this._hubConnection.start();
         this._connectionState = ConnectionState.CONNECTED;
         console.log("SignalR Connected");
-        // Registration will be handled by Table.svelte
       } catch (err) {
         this._connectionState = ConnectionState.FAILED;
         console.error("Error starting connection:", err);
@@ -239,12 +183,6 @@ export class Cards56Hub {
         await this._hubConnection.stop();
         this._connectionState = ConnectionState.DISCONNECTED;
         console.log("SignalR Disconnected");
-
-        // Clean up error cleanup interval if it exists
-        if (this._errorCleanupInterval !== null) {
-          window.clearInterval(this._errorCleanupInterval);
-          this._errorCleanupInterval = null;
-        }
       } catch (err) {
         console.error("Error stopping connection:", err);
         this._connectionState = ConnectionState.FAILED;
@@ -258,7 +196,7 @@ export class Cards56Hub {
     try {
       // Check connection state first
       if (this._hubConnection.state !== signalR.HubConnectionState.Connected) {
-        console.log("Not connected, cannot register player. Current state:", this._hubConnection.state);
+        console.log("Cannot register player. Hub connection state:", this._hubConnection.state);
         return; // Exit without trying to register
       }
       

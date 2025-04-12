@@ -45,27 +45,17 @@
 
 <div class="table-container">
   {#if hub.connectionState === ConnectionState.CONNECTING}
-    <div class="avatar-container">
-      <Alert type="info" title="Connecting" message="Attempting to connect to the server..." dismissible={true} duration = {0}/>
-    </div>
+    <Alert type="info" title="Connecting" message="Attempting to connect to https://play.56cards.com/Cards56Hub ..." dismissible={true} duration = {0}/>
   {:else if hub.connectionState === ConnectionState.RECONNECTING}
-    <div class="avatar-container">
-      <Alert type="info" title="Reconnecting" message="Attempting to reconnect to the server..." dismissible={true} duration = {0}/>
-    </div>
+    <Alert type="info" title="Reconnecting" message="Attempting to reconnect to https://play.56cards.com/Cards56Hub ..." dismissible={true} duration = {0}/>
   <!--
   {:else if hub.connectionState === ConnectionState.CONNECTED}
-    <div class="avatar-container">
       <Alert type="success" title="Connected" message="You are now connected to the server." dismissible={true}/>
-    </div>
   -->
   {:else if hub.connectionState === ConnectionState.FAILED}
-    <div class="avatar-container">
-      <Alert type="danger" title="Connection Failed" message="" dismissible={true} duration = {0}/>
-    </div>
+    <Alert type="danger" title="Connection Failed" message="Cannot connect to https://play.56cards.com/Cards56Hub." dismissible={true} duration = {0}/>
   {:else if hub.connectionState === ConnectionState.DISCONNECTED}
-    <div class="avatar-container">
-      <Alert type="danger" title="Disconnected from the server..." message="" dismissible={true} duration = {0}/>
-    </div>
+    <Alert type="danger" title="Disconnected" message="" dismissible={true} duration = {0}/>
   {/if}
 
   <!-- <input type="button" value="Connect" onclick={() => hub.connect()} />
