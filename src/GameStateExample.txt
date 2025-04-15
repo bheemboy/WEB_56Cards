@@ -1,0 +1,270 @@
+{
+  "PlayerPosition": 2,
+  "PlayerID": "655C64F0-94DA-43FC-8369-0E0F24D93D12",
+  "WatchOnly": true,
+  "TableFull": true,
+  "GameStage": 5,
+  "PlayerCards": [
+    "d9",
+    "d1"
+  ],
+  "TrumpExposed": true,
+  "CurrentRoundSuit": " ",
+  "TrumpCard": "s9",
+  "TableInfo": {
+    "Chairs": [
+      {
+        "Position": 0,
+        "Occupant": {
+          "PlayerID": "0BA693EC-B634-4E93-BAAE-48AAFEAC5476",
+          "Name": "P1",
+          "Lang": "ml-IN",
+          "WatchOnly": false
+        },
+        "Watchers": [
+          {
+            "PlayerID": "36AFB2C5-7DDA-4234-B1CF-BD8F0A6E1300",
+            "Name": "W-1",
+            "Lang": "ml-IN",
+            "WatchOnly": true
+          }
+        ],
+        "KodiCount": 0,
+        "KodiJustInstalled": false
+      },
+      {
+        "Position": 1,
+        "Occupant": {
+          "PlayerID": "4FEE3489-937D-42EC-B2E9-E6BE510706FA",
+          "Name": "P2",
+          "Lang": "ml-IN",
+          "WatchOnly": false
+        },
+        "Watchers": [
+          {
+            "PlayerID": "2F38E18C-A494-4611-A03B-B0DB22A3D6A2",
+            "Name": "W-2",
+            "Lang": "ml-IN",
+            "WatchOnly": true
+          }
+        ],
+        "KodiCount": 0,
+        "KodiJustInstalled": false
+      },
+      {
+        "Position": 2,
+        "Occupant": {
+          "PlayerID": "A091B19F-F18C-4F6E-B284-6791FBE319B8",
+          "Name": "P3",
+          "Lang": "ml-IN",
+          "WatchOnly": false
+        },
+        "Watchers": [
+          {
+            "PlayerID": "655C64F0-94DA-43FC-8369-0E0F24D93D12",
+            "Name": "സുള്ളൻ",
+            "Lang": "en-US",
+            "WatchOnly": true
+          }
+        ],
+        "KodiCount": 0,
+        "KodiJustInstalled": false
+      },
+      {
+        "Position": 3,
+        "Occupant": {
+          "PlayerID": "D0FFA7A6-33DC-4027-AB36-47C9253CAC32",
+          "Name": "P4",
+          "Lang": "ml-IN",
+          "WatchOnly": false
+        },
+        "Watchers": [],
+        "KodiCount": 0,
+        "KodiJustInstalled": false
+      }
+    ],
+    "Type": 0,
+    "MaxPlayers": 4,
+    "TableName": "PUBLIC_TABLE_1dbee1c972c74519809884d228be1091",
+    "GameCancelled": false,
+    "GameForfeited": false,
+    "Bid": {
+      "HighBid": 31,
+      "HighBidder": 1,
+      "NextBidder": 1,
+      "NextMinBid": 40,
+      "BidHistory": [
+        {
+          "Position": 2,
+          "Bid": 28
+        },
+        {
+          "Position": 3,
+          "Bid": 29
+        },
+        {
+          "Position": 0,
+          "Bid": 30
+        },
+        {
+          "Position": 1,
+          "Bid": 31
+        },
+        {
+          "Position": 2,
+          "Bid": 0
+        },
+        {
+          "Position": 0,
+          "Bid": 0
+        },
+        {
+          "Position": 3,
+          "Bid": 0
+        },
+        {
+          "Position": 1,
+          "Bid": 0
+        }
+      ]
+    },
+    "Rounds": [
+      {
+        "TrumpExposed": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "FirstPlayer": 2,
+        "NextPlayer": 1,
+        "PlayedCards": [
+          "h11",
+          "h1",
+          "h9",
+          "h9"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 2,
+        "Score": 8
+      },
+      {
+        "TrumpExposed": [
+          false,
+          true,
+          true,
+          true
+        ],
+        "FirstPlayer": 2,
+        "NextPlayer": 1,
+        "PlayedCards": [
+          "d11",
+          "s1",
+          "d10",
+          "d1"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 3,
+        "Score": 6
+      },
+      {
+        "TrumpExposed": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "FirstPlayer": 3,
+        "NextPlayer": 2,
+        "PlayedCards": [
+          "s11",
+          "s10",
+          "s10",
+          "h10"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 3,
+        "Score": 6
+      },
+      {
+        "TrumpExposed": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "FirstPlayer": 3,
+        "NextPlayer": 2,
+        "PlayedCards": [
+          "c11",
+          "c1",
+          "c11",
+          "c10"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 3,
+        "Score": 8
+      },
+      {
+        "TrumpExposed": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "FirstPlayer": 3,
+        "NextPlayer": 2,
+        "PlayedCards": [
+          "h1",
+          "h10",
+          "h11",
+          "d10"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 1,
+        "Score": 6
+      },
+      {
+        "TrumpExposed": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "FirstPlayer": 1,
+        "NextPlayer": 0,
+        "PlayedCards": [
+          "s11",
+          "c1",
+          "c9",
+          "s1"
+        ],
+        "AutoPlayNextCard": "",
+        "Winner": 1,
+        "Score": 7
+      },
+      {
+        "TrumpExposed": [],
+        "FirstPlayer": 1,
+        "NextPlayer": 1,
+        "PlayedCards": [],
+        "AutoPlayNextCard": "",
+        "Winner": -1,
+        "Score": -1
+      }
+    ],
+    "DealerPos": 2,
+    "RoundWinner": 1,
+    "RoundOver": true,
+    "WinningTeam": 1,
+    "WinningScore": 1,
+    "TeamScore": [
+      8,
+      33
+    ],
+    "CoolieCount": [
+      5,
+      7
+    ]
+  }
+}

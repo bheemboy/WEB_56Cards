@@ -1,6 +1,12 @@
 import * as signalR from "@microsoft/signalr";
 import { loginParams } from "./LoginParams.svelte";
 import { alertStoreInstance } from "./AlertStore.svelte";
+import { TableInfo } from "./states/TableInfo.svelte"
+import { CurrentPlayer } from "./states/CurrentPlayer.svelte";
+import { GameInfo } from "./states/GameInfo.svelte";
+import { Chairs } from "./states/Chairs.svelte";
+import { BidInfo } from "./states/BidInfo.svelte";
+import { RoundsInfo } from "./states/Rounds.svelte";
 
 class CustomRetryPolicy implements signalR.IRetryPolicy {
   nextRetryDelayInMilliseconds(retryContext: signalR.RetryContext): number | null {
@@ -26,7 +32,7 @@ export const ConnectionState = {
   FAILED: "failed"
 };
 
-export enum Cards56HubMethod {
+enum Cards56HubMethod {
   RegisterPlayer = 1,
   JoinTable = 2,
   PlaceBid = 3,
@@ -39,7 +45,7 @@ export enum Cards56HubMethod {
   ForfeitGame = 10,
 }
 
-export interface Player {
+interface Player {
   playerID: string;
   name: string;
   lang: string;
@@ -47,7 +53,7 @@ export interface Player {
   watchOnly: boolean;
 }
 
-export interface ErrorInfo {
+interface ErrorInfo {
   errorCode: number;
   hubMethodID: Cards56HubMethod;
   errorMessage: string;
@@ -61,8 +67,13 @@ export class Cards56Hub {
   private _hubConnection: signalR.HubConnection;
   private _connectionState = $state(ConnectionState.DISCONNECTED);
   private _playerId: string | null = null;
-  private _gameState = $state<any>(null);
-  
+  private _tableInfo: TableInfo = $state<TableInfo>(new TableInfo());
+  private _currentPlayer: CurrentPlayer = $state<CurrentPlayer>(new CurrentPlayer());
+  private _gameInfo: GameInfo = $state<GameInfo>(new GameInfo());
+  private _chairs: Chairs = $state<Chairs>(new Chairs());
+  private _bidInfo: BidInfo = $state<BidInfo>(new BidInfo());
+  private _roundsInfo: RoundsInfo = $state<RoundsInfo>(new RoundsInfo());
+
   // Get access to alert store for error handling
   private _alertStore = alertStoreInstance;
 
@@ -70,8 +81,28 @@ export class Cards56Hub {
     return this._connectionState;
   }
 
-  public get gameState() {
-    return this._gameState;
+  public get tableInfo() {
+    return this._tableInfo;
+  }
+
+  public get currentPlayer() {
+    return this._currentPlayer;
+  }
+
+  public get gameInfo() {
+    return this._gameInfo;
+  }  
+
+  public get chairs() {
+    return this._chairs;
+  }
+  
+  public get bidInfo() {
+    return this._bidInfo;
+  }
+
+  public get roundsInfo() {
+    return this._roundsInfo;
   }
 
   // Static instance holder - create instance immediately
@@ -146,12 +177,26 @@ export class Cards56Hub {
     // Private handling of OnStateUpdated events
     this._hubConnection.on("OnStateUpdated", (jsonState: string) => {
       try {
-        // Parse JSON state and update _gameState
-        this._gameState = JSON.parse(jsonState);
+        // Parse JSON state only once
+        var state = JSON.parse(jsonState);
+        // console.log("Game state received:", state);
+        
+        // Batch all updates together
+        const tableInfoChanged = this._tableInfo.update(state);
+        const currentPlayerChanged = this._currentPlayer.update(state);
+        const gameInfoChanged = this._gameInfo.update(state);
+        const chairsChanged = this._chairs.update(state);
+        const bidInfoChanged = this._bidInfo.update(state);
+        const roundsInfoChanged = this._roundsInfo.update(state);
+
+        // Only log if something actually changed
+        if (tableInfoChanged || currentPlayerChanged || gameInfoChanged ||
+          chairsChanged || bidInfoChanged || roundsInfoChanged) {
+          console.debug("Game state updated - changes detected");
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error parsing game state: ${errorMessage}`, jsonState);
-        // Not showing alerts for parsing errors as they're technical issues
       }
     });
 
@@ -165,7 +210,6 @@ export class Cards56Hub {
       if (!player.tableName) {
         // Inlined joinTable logic (previously a private method)
         this._hubConnection.invoke("JoinTable", parseInt(loginParams.tableType), loginParams.tableName)
-          .then(() => console.info("Automatically invoked JoinTable after registration"))
           .catch(error => {
             console.error("Error invoking JoinTable:", error);
           });
