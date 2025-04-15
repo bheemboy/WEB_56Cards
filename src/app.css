@@ -20,7 +20,7 @@ body {
   align-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #2c3e50;
+  background-color: hsl(0, 0%, 13%);
 }
 
 #app {
