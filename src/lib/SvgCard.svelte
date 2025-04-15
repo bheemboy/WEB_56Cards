@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    const CARDHEIGHT = 1187.72;
-    const CARDWIDTH = 873.51;
+    const CARDHEIGHT = 190;
+    const CARDWIDTH = 140;
     const ASPECTRATIO = CARDWIDTH / CARDHEIGHT; 
     
     export interface SvgCardProps {
@@ -38,26 +38,26 @@
     });
 </script>
 
-<div 
-    class="card {imageError ? 'invalid-card' : ''}"
-    role="button"
-    tabindex="0"
-    onclick={oncardplayed}
-    onkeydown={() => {}}
-    aria-label={`${card} playing card`}
-    style:height = "{vh}vh"
-    style:aspect-ratio = {ASPECTRATIO}
-    style:background-image = 'url("/images/svgcards/{card}.svg")'
-    style:transform-origin = "30% 100%"
-    style:transform = "rotate({rotation}deg)"
-    style:translate = "{translation}px"
-    style:transition = "top 0.1s ease-out"
-    onerror={handleImageError}
-    >
-    {#if imageError}
-        <div class="error">Invalid card: {card}</div>
-    {/if}
-</div>
+{#if imageError}
+  <div class="error">Invalid card: {card}</div>
+{:else}
+  <div 
+      class="card {imageError ? 'invalid-card' : ''}"
+      role="button"
+      tabindex="0"
+      onclick={oncardplayed}
+      onkeydown={() => {}}
+      aria-label={`${card} playing card`}
+      style:height = "{vh}vh"
+      style:aspect-ratio = {ASPECTRATIO}
+      style:background-image = 'url("/images/svgcards/{card}.svg")'
+      style:transform-origin = "30% 100%"
+      style:transform = "rotate({rotation}deg)"
+      style:translate = "{translation}px"
+      style:transition = "top 0.1s ease-out"
+      onerror={handleImageError}>
+  </div>
+{/if}
 
 <style>
     .card {

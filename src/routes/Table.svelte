@@ -10,7 +10,7 @@
   import Avatar from "../lib/Avatar.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
 
-  const cards = ["c11", "d12", "h13", "s9", "s9", "s9", "h9", "s7"]; 
+  const cards = ["c11", "d12", "c1", "s9", "s9", "s9", "h9", "s7"]; 
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
