@@ -8,7 +8,7 @@
         percardtranslation?: number 
     }
 
-    let { cards, vh = 20, percardrotation = 13, percardtranslation = 14} : CardsDeckProps = $props();
+    let { cards = $bindable(), vh = 18, percardrotation = 13, percardtranslation = 2.5} : CardsDeckProps = $props();
 
     // The array of card data to use in the markup
     let cardsData: SvgCardProps[] = $state([]);
@@ -22,14 +22,16 @@
             translation: percardtranslation * (i - (cards.length - 1) / 2),
             oncardplayed: () => {
                 // Remove the card from the deck
-                cards = [...cards.slice(0, i), ...cards.slice(i + 1)];
-                // console.log(`removed card at index ${index}, remaining cards ${cards}`);
+                // cards = [...cards.slice(0, i), ...cards.slice(i + 1)];
+                console.log(`try to play card at index ${i}, remaining cards ${cards}`);
             }
         }));
     });
 </script>
 
-<div class="deck">
+<div class="deck"
+  style:height = "{vh*1.5}vh"
+  style:aspect-ratio = {2}>
     {#each cardsData as cardData, index (cardData.card + '-' + index)}
         <SvgCard {...cardData} />
     {/each}
@@ -38,7 +40,9 @@
 <style>
     .deck {
         position: relative;
-        height: 22vh;
-        aspect-ratio: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* border: 1px solid rgba(255, 255, 255, 0.2); */
     }
 </style>

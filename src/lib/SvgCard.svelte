@@ -53,7 +53,7 @@
       style:background-image = 'url("/images/svgcards/{card}.svg")'
       style:transform-origin = "30% 100%"
       style:transform = "rotate({rotation}deg)"
-      style:translate = "{translation}px"
+      style:translate = "{translation}vh 0"
       style:transition = "top 0.1s ease-out"
       onerror={handleImageError}>
   </div>
@@ -68,7 +68,7 @@
       top: 9%;
     }
     .card:hover {
-        top: 8%;
+        top: 6%;
     }
 
     .error {

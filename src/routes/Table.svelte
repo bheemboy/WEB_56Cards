@@ -9,8 +9,7 @@
   } from "../lib/Cards56Hub.svelte";
   import Avatar from "../lib/Avatar.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
-
-  const cards = ["c11", "d12", "c1", "s9", "s9", "s9", "h9", "s7"]; 
+    import { CurrentPlayer } from "../lib/states/CurrentPlayer.svelte";
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -85,18 +84,19 @@
 </script>
 
 <div class="table-container">
-  <CardsDeck {cards} />
-
-  <div class="avatar-container">
-    <Avatar team={1} />
-  </div>
+  <CardsDeck bind:cards={hub.currentPlayer.playerCards} />
 </div>
 
 <style>
-  .avatar-container {
-    margin: 1rem;
+  .table-container {
+    width: 100%;
+    height: 100vh;
+    /* border: 1px solid rgba(255, 255, 255, 0.2); */
+    position: relative;
     display: flex;
+    align-items: flex-end;
     justify-content: center;
-    align-items: center;
+    /* padding-bottom: 8vh; */
+    overflow: hidden;
   }
 </style>
