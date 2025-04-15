@@ -8,6 +8,9 @@
     cards56HubContextKey,
   } from "../lib/Cards56Hub.svelte";
   import Avatar from "../lib/Avatar.svelte";
+  import CardsDeck from "../lib/CardsDeck.svelte";
+
+  const cards = ["c11", "d12", "h13", "s9", "s9", "s9", "h9", "s7"]; 
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -82,6 +85,8 @@
 </script>
 
 <div class="table-container">
+  <CardsDeck {cards} />
+
   <div class="avatar-container">
     <Avatar team={1} />
   </div>

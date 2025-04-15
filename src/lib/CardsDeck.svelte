@@ -1,23 +1,23 @@
 <script lang="ts">
-    import Card, {type CardProps} from "./Card.svelte";
+    import SvgCard, {type SvgCardProps} from "./SvgCard.svelte";
 
     export interface CardsDeckProps { 
         cards: string[]
-        scale?: number 
+        vh?: number 
         percardrotation?: number 
         percardtranslation?: number 
     }
 
-    let { cards, scale = 17, percardrotation = 13, percardtranslation = 14} : CardsDeckProps = $props();
+    let { cards, vh = 20, percardrotation = 13, percardtranslation = 14} : CardsDeckProps = $props();
 
     // The array of card data to use in the markup
-    let cardsData: CardProps[] = $state([]);
+    let cardsData: SvgCardProps[] = $state([]);
 
     // Recalc each card's properties based on its array index.
     $effect(() => {
-        cardsData = cards.map((c: string, i: number): CardProps => ({
+        cardsData = cards.map((c: string, i: number): SvgCardProps => ({
             card: c,
-            scale: scale,
+            vh: vh,
             rotation: percardrotation * (i - (cards.length - 1) / 2),
             translation: percardtranslation * (i - (cards.length - 1) / 2),
             oncardplayed: () => {
@@ -31,7 +31,7 @@
 
 <div class="deck">
     {#each cardsData as cardData, index (cardData.card + '-' + index)}
-        <Card {...cardData} />
+        <SvgCard {...cardData} />
     {/each}
 </div>
 
