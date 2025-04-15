@@ -9,7 +9,6 @@
   } from "../lib/Cards56Hub.svelte";
   import Avatar from "../lib/Avatar.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
-    import { CurrentPlayer } from "../lib/states/CurrentPlayer.svelte";
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -38,12 +37,6 @@
   $effect(() => {
     if (hub.tableInfo.snapshot.changeCount) {
       $inspect("TableInfo updated:", hub.tableInfo.toJSON());
-    }
-  });
-
-  $effect(() => {
-    if (hub.currentPlayer.snapshot.changeCount) {
-      $inspect("CurrentPlayer updated:", hub.currentPlayer.toJSON());
     }
   });
 

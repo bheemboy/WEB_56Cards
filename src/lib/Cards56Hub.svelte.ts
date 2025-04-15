@@ -183,14 +183,14 @@ export class Cards56Hub {
         
         // Batch all updates together
         const tableInfoChanged = this._tableInfo.update(state);
-        const currentPlayerChanged = this._currentPlayer.update(state);
+        this._currentPlayer = CurrentPlayer.update(this._currentPlayer, state);
         const gameInfoChanged = this._gameInfo.update(state);
         const chairsChanged = this._chairs.update(state);
         const bidInfoChanged = this._bidInfo.update(state);
         const roundsInfoChanged = this._roundsInfo.update(state);
 
         // Only log if something actually changed
-        if (tableInfoChanged || currentPlayerChanged || gameInfoChanged ||
+        if (tableInfoChanged || gameInfoChanged ||
           chairsChanged || bidInfoChanged || roundsInfoChanged) {
           console.debug("Game state updated - changes detected");
         }
