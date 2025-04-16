@@ -179,21 +179,18 @@ export class Cards56Hub {
       try {
         // Parse JSON state only once
         var state = JSON.parse(jsonState);
-        // console.log("Game state received:", state);
-        
-        // Batch all updates together
+        let changed = false;
         const tableInfoChanged = this._tableInfo.update(state);
-        this._currentPlayer = CurrentPlayer.update(this._currentPlayer, state);
+
+        [this._currentPlayer, changed] = CurrentPlayer.update(this._currentPlayer, state);
+        if (changed) {
+          console.info("Current player updated:", this._currentPlayer);
+        }
         const gameInfoChanged = this._gameInfo.update(state);
         const chairsChanged = this._chairs.update(state);
         const bidInfoChanged = this._bidInfo.update(state);
         const roundsInfoChanged = this._roundsInfo.update(state);
 
-        // Only log if something actually changed
-        if (tableInfoChanged || gameInfoChanged ||
-          chairsChanged || bidInfoChanged || roundsInfoChanged) {
-          console.debug("Game state updated - changes detected");
-        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error parsing game state: ${errorMessage}`, jsonState);

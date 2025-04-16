@@ -25,7 +25,7 @@ export class CurrentPlayer {
    * @param gameState The parsed game state JSON object
    * @returns boolean indicating if any property was updated
    */
-  public static update(player: CurrentPlayer, gameState: any): CurrentPlayer {
+  public static update(player: CurrentPlayer, gameState: any): [CurrentPlayer, boolean] {
     let newPlayer = new CurrentPlayer();
     newPlayer._playerID = gameState.PlayerID || '';
     newPlayer._playerPosition = gameState.PlayerPosition || -1;
@@ -54,9 +54,9 @@ export class CurrentPlayer {
       player._watchOnly === newPlayer._watchOnly &&
       player._playerPosition === newPlayer._playerPosition &&
       JSON.stringify(player._playerCards) === JSON.stringify(newPlayer._playerCards)) {
-      return player;
+      return [player, false];
     }
-    return newPlayer;
+    return [newPlayer, true];
   }
 
   /**
