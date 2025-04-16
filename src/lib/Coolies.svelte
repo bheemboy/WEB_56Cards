@@ -3,10 +3,12 @@
     let background_image = $derived(`images/Glass_button_${team === 0 ? 'blue' : 'red'}.svg`);
 </script>
 
-<div class="cooliebar" class:my-team={myteam}>
+<div class:hide-on-phone={!myteam}>
+  <div class="cooliebar" class:my-team={myteam}>
     {#each Array(coolie_count) as _, index (index)}
         <div class="coolie" style="--background_image: url({background_image})"></div>
     {/each}
+</div>
 </div>
 
 <style>

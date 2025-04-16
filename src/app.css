@@ -30,3 +30,15 @@ body {
   /* padding: 2rem; */
   text-align: center;
 }
+
+@media (max-width: 450px) {
+  .hide-on-phone {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-on-tablet {
+    display: none;
+  }
+}
