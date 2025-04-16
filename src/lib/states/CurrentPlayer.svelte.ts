@@ -28,10 +28,10 @@ export class CurrentPlayer {
    */
   public static update(player: CurrentPlayer, gameState: any): [CurrentPlayer, boolean] {
     let newPlayer = new CurrentPlayer();
-    newPlayer._playerID = gameState.PlayerID ?? '';
-    newPlayer._playerPosition = gameState.PlayerPosition ?? -1;
+    newPlayer._playerID = gameState.PlayerID !== undefined ? gameState.PlayerID : '';
+    newPlayer._playerPosition = gameState.PlayerPosition !== undefined ? gameState.PlayerPosition : -1;
     newPlayer._playerCards = gameState.PlayerCards ? [...gameState.PlayerCards] : [];
-    newPlayer._watchOnly = gameState.WatchOnly ?? false;
+    newPlayer._watchOnly = gameState.WatchOnly !== undefined ? gameState.WatchOnly : false;
 
     if (gameState.TableInfo?.Chairs && newPlayer._playerPosition !== -1) {
       const chair = gameState.TableInfo.Chairs.find(
