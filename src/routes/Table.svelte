@@ -5,6 +5,7 @@
   import { type Cards56Hub, ConnectionState, cards56HubContextKey } from "../lib/Cards56Hub.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
+  import TeamScores from "../lib/TeamScores.svelte";
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -31,15 +32,20 @@
   });
 
   // Use effect to handle player registration when connection state changes
-  // the $effect() block runs once initially after the component is set up
-  // And then everytime the hub.connectionState changes
+  type Coolie = {team: number; coolieCount: number; myteam: boolean;};
+  let coolies: Coolie[] = $state([]);
+
   $effect(() => {
     if (hub.connectionState === ConnectionState.CONNECTED) {
       hub.registerPlayer().catch(() => {
         // Errors are now handled by the hub itself with alerts
       });
     }
-
+    coolies = [
+      {team: hub.currentPlayer.team, coolieCount: hub.gameInfo.coolieCount[hub.currentPlayer.team], myteam: true},
+      {team: 1-hub.currentPlayer.team, coolieCount: hub.gameInfo.coolieCount[1-hub.currentPlayer.team], myteam: false}
+    ];
+      
     $inspect("hub.currentPlayer.team", hub.currentPlayer.team);
     $inspect("hub.gameInfo.coolieCount", hub.gameInfo.coolieCount);
   });
@@ -49,8 +55,10 @@
 
 <div class="table-container">
   {#if hub.currentPlayer.team >= 0}
-  <Coolies team={hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[hub.currentPlayer.team]} myteam={true} />
-  <Coolies team={1 - hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[1- hub.currentPlayer.team]} myteam={false} />
+    {#each coolies as {team, coolieCount, myteam}}
+      <Coolies {team} {coolieCount} {myteam}/>
+      <TeamScores {team} {myteam}/>
+    {/each}
   {/if}
 
   <CardsDeck bind:cards={hub.currentPlayer.playerCards} />

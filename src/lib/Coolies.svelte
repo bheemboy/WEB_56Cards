@@ -1,11 +1,11 @@
 <script lang="ts">
-    let { team, coolie_count, myteam } = $props<{ team: number, coolie_count: number, myteam: boolean }>();
+    let { team, coolieCount, myteam } = $props<{ team: number, coolieCount: number, myteam: boolean }>();
     let background_image = $derived(`images/Glass_button_${team === 0 ? 'blue' : 'red'}.svg`);
 </script>
 
 <div class:hide-on-phone={!myteam}>
   <div class="cooliebar" class:my-team={myteam}>
-    {#each Array(coolie_count) as _, index (index)}
+    {#each Array(coolieCount) as _, index (index)}
         <div class="coolie" style="--background_image: url({background_image})"></div>
     {/each}
 </div>
