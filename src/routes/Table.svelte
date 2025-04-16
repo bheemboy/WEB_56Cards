@@ -58,11 +58,16 @@
 
 <style>
   .table-container {
-    width: 100vh;
-    height: 100vh;
-    max-width: 100%;
+    width: 99vh;
+    height: 99vh;
+    max-width: 99vw;
     aspect-ratio: 1;
-    background-color: #1F1F1F;
+    background-image: url('/images/table-background.jpg');
+    background-size: cover;
+    background-position: center;
+    border: solid 2px brown;
+    border-radius: 8px;
+    /* background-color: #1F1F1F; */
     /* border: 1px solid rgba(255, 255, 255, 0.2); */
     position: relative;
     display: flex;
