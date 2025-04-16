@@ -26,19 +26,6 @@ export interface Chair {
  */
 export class Chairs {
   private _chairs: Chair[] = [];
-  private _changeCount: number = $state(0);
-
-  // Getter that returns the current snapshot as frozen object
-  // which will not trigger reactivity on property access
-  public get snapshot(): Readonly<{
-    chairs: Chair[];
-    changeCount: number;
-  }> {
-    return Object.freeze({
-      chairs: [...this._chairs],
-      changeCount: this._changeCount
-    });
-  }
 
   /**
    * Get chair information at a specific position
@@ -59,47 +46,27 @@ export class Chairs {
 
   /**
    * Updates the Chairs with data from a game state JSON
-   * Only triggers a single reactive update if any property changed
+   * @param chairs The existing Chairs object
    * @param gameState The parsed game state JSON object
-   * @returns boolean indicating if any property was updated
+   * @returns [Chairs, boolean] pair with new or existing Chairs and whether it changed
    */
-  public update(gameState: any): boolean {
-    let hasChanged = false;
+  public static update(chairs: Chairs, gameState: any): [Chairs, boolean] {
+    let newChairs = new Chairs();
 
     // Extract TableInfo data from the root or from TableInfo property
     const tableInfo = gameState.TableInfo || gameState;
     
     if (tableInfo.Chairs && Array.isArray(tableInfo.Chairs)) {
-      // Deep comparison of chairs array to detect changes
-      const newChairs = tableInfo.Chairs;
-      
-      // Check if length changed
-      if (this._chairs.length !== newChairs.length) {
-        hasChanged = true;
-      } else {
-        // Check each chair for changes
-        for (let i = 0; i < newChairs.length; i++) {
-          if (!this._chairs[i] || 
-              JSON.stringify(this._chairs[i]) !== JSON.stringify(newChairs[i])) {
-            hasChanged = true;
-            break;
-          }
-        }
-      }
-
-      // If changes detected, update the internal state
-      if (hasChanged) {
-        this._chairs = [...newChairs];
-      }
+      // Create a deep copy of the chairs array
+      newChairs._chairs = JSON.parse(JSON.stringify(tableInfo.Chairs));
     }
 
-    // Only increment the change counter if something actually changed
-    // This is the only reactive property that will trigger updates
-    if (hasChanged) {
-      this._changeCount++;
+    // Compare the new object with the existing one
+    if (chairs && JSON.stringify(chairs._chairs) === JSON.stringify(newChairs._chairs)) {
+      return [chairs, false];
     }
-
-    return hasChanged;
+    
+    return [newChairs, true];
   }
 
   /**

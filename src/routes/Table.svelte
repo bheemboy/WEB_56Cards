@@ -34,36 +34,6 @@
     loginParams.watch = params.watch === "true" ? true : loginParams.watch;
   });
 
-  $effect(() => {
-    if (hub.tableInfo.snapshot.changeCount) {
-      $inspect("TableInfo updated:", hub.tableInfo.toJSON());
-    }
-  });
-
-  $effect(() => {
-    if (hub.gameInfo.snapshot.changeCount) {
-      $inspect("GameInfo updated:", hub.gameInfo.toJSON());
-    }
-  });
-
-  $effect(() => {
-    if (hub.chairs.snapshot.changeCount) {
-      $inspect("Chairs updated:", hub.chairs.toJSON());
-    }
-  });
-
-  $effect(() => {
-    if (hub.bidInfo.snapshot.changeCount) {
-      $inspect("BidInfo updated:", hub.bidInfo.toJSON());
-    }
-  });
-
-  $effect(() => {
-    if (hub.roundsInfo.snapshot.changeCount) {
-      $inspect("RoundsInfo updated:", hub.roundsInfo.toJSON());
-    }
-  });
-
   // Use effect to handle player registration when connection state changes
   // the $effect() block runs once initially after the component is set up
   // And then everytime the hub.connectionState changes

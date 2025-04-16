@@ -178,18 +178,26 @@ export class Cards56Hub {
     this._hubConnection.on("OnStateUpdated", (jsonState: string) => {
       try {
         // Parse JSON state only once
-        var state = JSON.parse(jsonState);
         let changed = false;
-        const tableInfoChanged = this._tableInfo.update(state);
+        var gameState = JSON.parse(jsonState);
+        
+        [this._tableInfo, changed] = TableInfo.update(this._tableInfo, gameState);
+        if (changed) console.info("TableInfo changed:", this._tableInfo);
 
-        [this._currentPlayer, changed] = CurrentPlayer.update(this._currentPlayer, state);
-        if (changed) {
-          console.info("Current player updated:", this._currentPlayer);
-        }
-        const gameInfoChanged = this._gameInfo.update(state);
-        const chairsChanged = this._chairs.update(state);
-        const bidInfoChanged = this._bidInfo.update(state);
-        const roundsInfoChanged = this._roundsInfo.update(state);
+        [this._currentPlayer, changed] = CurrentPlayer.update(this._currentPlayer, gameState);
+        if (changed) console.info("CurrentPlayer changed:", this._currentPlayer);
+
+        [this._gameInfo, changed] = GameInfo.update(this._gameInfo, gameState);
+        if (changed) console.info("GameInfo changed:", this._gameInfo);
+
+        [this._bidInfo, changed] = BidInfo.update(this._bidInfo, gameState);
+        if (changed) console.info("BidInfo changed:", this._bidInfo);
+
+        [this._chairs, changed] = Chairs.update(this._chairs, gameState);
+        if (changed) console.info("Chairs changed:", this._chairs);
+
+        [this._roundsInfo, changed] = RoundsInfo.update(this._roundsInfo, gameState);
+        if (changed) console.info("RoundsInfo changed:", this._roundsInfo);
 
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";

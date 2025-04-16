@@ -17,7 +17,6 @@ export class BidInfo {
   private _nextBidder: number = -1;
   private _nextMinBid: number = 0;
   private _bidHistory: BidHistoryEntry[] = [];
-  private _changeCount: number = $state(0);
 
   // Getters that don't trigger reactive updates on read
   public get highBid(): number { return this._highBid; }
@@ -26,120 +25,51 @@ export class BidInfo {
   public get nextMinBid(): number { return this._nextMinBid; }
   public get bidHistory(): BidHistoryEntry[] { return [...this._bidHistory]; }
   
-  // Getter that returns the current snapshot as frozen object
-  // which will not trigger reactivity on property access
-  public get snapshot(): Readonly<{
-    highBid: number;
-    highBidder: number;
-    nextBidder: number;
-    nextMinBid: number;
-    bidHistory: BidHistoryEntry[];
-    changeCount: number;
-  }> {
-    return Object.freeze({
-      highBid: this._highBid,
-      highBidder: this._highBidder,
-      nextBidder: this._nextBidder,
-      nextMinBid: this._nextMinBid,
-      bidHistory: [...this._bidHistory],
-      changeCount: this._changeCount
-    });
-  }
-
-  /**
-   * Check if a player has passed on bidding
-   * @param position The player position to check
-   * @returns boolean indicating if player has passed (bid 0)
-   */
-  public hasPlayerPassed(position: number): boolean {
-    return this._bidHistory.some(entry => 
-      entry.Position === position && entry.Bid === 0
-    );
-  }
-
-  /**
-   * Get the highest bid placed by a specific player
-   * @param position The player position to check
-   * @returns The highest bid value or 0 if no bids
-   */
-  public getPlayerHighestBid(position: number): number {
-    const playerBids = this._bidHistory
-      .filter(entry => entry.Position === position && entry.Bid > 0)
-      .map(entry => entry.Bid);
-    
-    return playerBids.length > 0 ? Math.max(...playerBids) : 0;
-  }
-
   /**
    * Updates the BidInfo with data from a game state JSON
-   * Only triggers a single reactive update if any property changed
+   * @param bid The existing BidInfo object
    * @param gameState The parsed game state JSON object
-   * @returns boolean indicating if any property was updated
+   * @returns [BidInfo, boolean] pair with new or existing BidInfo and whether it changed
    */
-  public update(gameState: any): boolean {
-    let hasChanged = false;
+  public static update(bid: BidInfo, gameState: any): [BidInfo, boolean] {
+    let newBid = new BidInfo();
 
     // Extract TableInfo data from the root or from TableInfo property
     const tableInfo = gameState.TableInfo || gameState;
     
     if (!tableInfo.Bid) {
-      return false;
+      // If there's no bid information, return the existing object unchanged
+      if (bid) {
+        return [bid, false];
+      } else {
+        // If there's no existing object either, return the new empty one
+        return [newBid, true];
+      }
     }
 
     const bidInfo = tableInfo.Bid;
 
-    // Update highBid if changed
-    if (bidInfo.HighBid !== undefined && this._highBid !== bidInfo.HighBid) {
-      this._highBid = bidInfo.HighBid;
-      hasChanged = true;
-    }
+    // Set all properties on the new object
+    newBid._highBid = bidInfo.HighBid !== undefined ? bidInfo.HighBid : 0;
+    newBid._highBidder = bidInfo.HighBidder !== undefined ? bidInfo.HighBidder : -1;
+    newBid._nextBidder = bidInfo.NextBidder !== undefined ? bidInfo.NextBidder : -1;
+    newBid._nextMinBid = bidInfo.NextMinBid !== undefined ? bidInfo.NextMinBid : 0;
+    
+    // Set bidHistory, ensuring we create a new array
+    newBid._bidHistory = bidInfo.BidHistory && Array.isArray(bidInfo.BidHistory) ? 
+        [...bidInfo.BidHistory] : [];
 
-    // Update highBidder if changed
-    if (bidInfo.HighBidder !== undefined && this._highBidder !== bidInfo.HighBidder) {
-      this._highBidder = bidInfo.HighBidder;
-      hasChanged = true;
+    // Compare the new object with the existing one
+    if (bid && 
+        bid._highBid === newBid._highBid &&
+        bid._highBidder === newBid._highBidder &&
+        bid._nextBidder === newBid._nextBidder &&
+        bid._nextMinBid === newBid._nextMinBid &&
+        JSON.stringify(bid._bidHistory) === JSON.stringify(newBid._bidHistory)) {
+      return [bid, false];
     }
-
-    // Update nextBidder if changed
-    if (bidInfo.NextBidder !== undefined && this._nextBidder !== bidInfo.NextBidder) {
-      this._nextBidder = bidInfo.NextBidder;
-      hasChanged = true;
-    }
-
-    // Update nextMinBid if changed
-    if (bidInfo.NextMinBid !== undefined && this._nextMinBid !== bidInfo.NextMinBid) {
-      this._nextMinBid = bidInfo.NextMinBid;
-      hasChanged = true;
-    }
-
-    // Update bidHistory if changed
-    if (bidInfo.BidHistory && Array.isArray(bidInfo.BidHistory)) {
-      // Check if the bid history has changed
-      const newBidHistory = bidInfo.BidHistory;
-      
-      // Compare length first for quick check
-      if (this._bidHistory.length !== newBidHistory.length) {
-        this._bidHistory = [...newBidHistory];
-        hasChanged = true;
-      } else {
-        // Deep comparison of arrays
-        const currentJson = JSON.stringify(this._bidHistory);
-        const newJson = JSON.stringify(newBidHistory);
-        
-        if (currentJson !== newJson) {
-          this._bidHistory = [...newBidHistory];
-          hasChanged = true;
-        }
-      }
-    }
-
-    // Only increment the change counter if something actually changed
-    // This is the only reactive property that will trigger updates
-    if (hasChanged) {
-      this._changeCount++;
-    }
-
-    return hasChanged;
+    
+    return [newBid, true];
   }
 
   /**
