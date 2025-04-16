@@ -49,8 +49,17 @@
 
 <div class="table-container">
   {#if hub.currentPlayer.team >= 0}
-  <Coolies team={hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[hub.currentPlayer.team]} myteam={true} />
-  <Coolies team={1 - hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[1- hub.currentPlayer.team]} myteam={false} />
+  <Coolies 
+    team={hub.currentPlayer.team} 
+    coolie_count={hub.gameInfo.coolieCount[hub.currentPlayer.team]} 
+    myteam={true} />
+  <div class="hide-on-phone">
+    <Coolies 
+    team={1 - hub.currentPlayer.team} 
+    coolie_count={hub.gameInfo.coolieCount[1- hub.currentPlayer.team]} 
+    myteam={false}
+  />
+  </div>
   {/if}
 
   <CardsDeck bind:cards={hub.currentPlayer.playerCards} />
@@ -67,13 +76,24 @@
     background-position: center;
     border: solid 2px brown;
     border-radius: 8px;
-    /* background-color: #1F1F1F; */
-    /* border: 1px solid rgba(255, 255, 255, 0.2); */
     position: relative;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     overflow: hidden;
     margin: 0 auto;
+  }
+
+
+  @media (max-width: 450px) {
+    .hide-on-phone {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hide-on-tablet {
+      display: none;
+    }
   }
 </style>

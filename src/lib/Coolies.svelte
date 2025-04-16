@@ -15,17 +15,17 @@
         flex-direction: row;
         gap: 2px;
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: min(1vw, 10px);
+        right: min(1vw, 10px);
     }
 
     .cooliebar.my-team {
         right: auto;
-        left: 10px;
+        left: min(1vw, 10px);
     }
 
     .coolie {
-        height: 3vh;
+        width: min(5vw, 30px);
         aspect-ratio: 1;
         background-image: var(--background_image);
         background-size: contain;
