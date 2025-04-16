@@ -2,13 +2,9 @@
 <script lang="ts">
   import { onMount, getContext } from "svelte";
   import { loginParams } from "../lib/LoginParams.svelte";
-  import {
-    type Cards56Hub,
-    ConnectionState,
-    cards56HubContextKey,
-  } from "../lib/Cards56Hub.svelte";
-  import Avatar from "../lib/Avatar.svelte";
+  import { type Cards56Hub, ConnectionState, cards56HubContextKey } from "../lib/Cards56Hub.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
+  import Coolies from "../lib/Coolies.svelte";
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -43,23 +39,36 @@
         // Errors are now handled by the hub itself with alerts
       });
     }
+
+    $inspect("hub.currentPlayer.team", hub.currentPlayer.team);
+    $inspect("hub.gameInfo.coolieCount", hub.gameInfo.coolieCount);
   });
-</script>
+
+
+  </script>
 
 <div class="table-container">
+  {#if hub.currentPlayer.team >= 0}
+  <Coolies team={hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[hub.currentPlayer.team]} myteam={true} />
+  <Coolies team={1 - hub.currentPlayer.team} coolie_count={hub.gameInfo.coolieCount[1- hub.currentPlayer.team]} myteam={false} />
+  {/if}
+
   <CardsDeck bind:cards={hub.currentPlayer.playerCards} />
 </div>
 
 <style>
   .table-container {
-    width: 100%;
+    width: 100vh;
     height: 100vh;
+    max-width: 100%;
+    aspect-ratio: 1;
+    background-color: #1F1F1F;
     /* border: 1px solid rgba(255, 255, 255, 0.2); */
     position: relative;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    /* padding-bottom: 8vh; */
     overflow: hidden;
+    margin: 0 auto;
   }
 </style>
