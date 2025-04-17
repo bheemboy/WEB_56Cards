@@ -69,7 +69,7 @@ export class Cards56Hub {
   private _playerId: string | null = null;
   private _tableInfo: TableInfo = $state<TableInfo>(new TableInfo());
   private _currentPlayer: CurrentPlayer = $state<CurrentPlayer>(new CurrentPlayer());
-  private _gameInfo: GameInfo = $state<GameInfo>(new GameInfo());
+  private _gameInfo: GameInfo = $state<GameInfo>(GameInfo.create());
   private _chairs: Chairs = $state<Chairs>(new Chairs());
   private _bidInfo: BidInfo = $state<BidInfo>(new BidInfo());
   private _roundsInfo: RoundsInfo = $state<RoundsInfo>(new RoundsInfo());
@@ -169,6 +169,8 @@ export class Cards56Hub {
       // Parse JSON state only once
       let changed = false;
       var gameState = JSON.parse(jsonState);
+
+      this._alertStore.hideAlert(); // Hide any existing alerts
       
       [this._tableInfo, changed] = TableInfo.update(this._tableInfo, gameState);
       if (changed) console.info("TableInfo changed:", this._tableInfo);
@@ -178,6 +180,13 @@ export class Cards56Hub {
 
       [this._gameInfo, changed] = GameInfo.update(this._gameInfo, gameState);
       if (changed) console.info("GameInfo changed:", this._gameInfo);
+      if (this._gameInfo.gameCancelled) {
+        this._alertStore.showInfo("", "Game Cancelled", 0);
+      }
+      if (this._gameInfo.gameForfeited) {
+        this._alertStore.showInfo("", "Game Forfeited", 0);
+      }
+
 
       [this._bidInfo, changed] = BidInfo.update(this._bidInfo, gameState);
       if (changed) console.info("BidInfo changed:", this._bidInfo);
