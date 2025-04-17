@@ -1,5 +1,5 @@
 <script lang="ts">
-    let { team, coolieCount, myteam } = $props<{ team: number, coolieCount: number, myteam: boolean }>();
+    let { team, myteam, coolieCount } = $props<{ team: number, myteam: boolean, coolieCount: number}>();
     let background_image = $derived(`images/Glass_button_${team === 0 ? 'blue' : 'red'}.svg`);
 </script>
 

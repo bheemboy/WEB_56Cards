@@ -60,6 +60,13 @@ interface ErrorInfo {
   errorData: any;
 }
 
+export type TeamInfo = {
+  team: number;
+  myteam: boolean;
+  currentScore: number;
+  winningScore: number;
+  coolieCount: number;};
+
 // Define a unique key for the context
 export const cards56HubContextKey = Symbol("cards56HubContext");
 
@@ -73,6 +80,7 @@ export class Cards56Hub {
   private _chairs: Chairs = $state<Chairs>(new Chairs());
   private _bidInfo: BidInfo = $state<BidInfo>(new BidInfo());
   private _roundsInfo: RoundsInfo = $state<RoundsInfo>(new RoundsInfo());
+  private _teams: TeamInfo[] = $state([]);
 
   // Get access to alert store for error handling
   private _alertStore = alertStoreInstance;
@@ -103,6 +111,10 @@ export class Cards56Hub {
 
   public get roundsInfo() {
     return this._roundsInfo;
+  }
+
+  public get teams() {
+    return this._teams;
   }
 
   // Static instance holder - create instance immediately
@@ -164,6 +176,59 @@ export class Cards56Hub {
     });
   }
 
+  private processState(jsonState: string): void {
+    try {
+      // Parse JSON state only once
+      let changed = false;
+      var gameState = JSON.parse(jsonState);
+      
+      [this._tableInfo, changed] = TableInfo.update(this._tableInfo, gameState);
+      if (changed) console.info("TableInfo changed:", this._tableInfo);
+
+      [this._currentPlayer, changed] = CurrentPlayer.update(this._currentPlayer, gameState);
+      if (changed) console.info("CurrentPlayer changed:", this._currentPlayer);
+
+      [this._gameInfo, changed] = GameInfo.update(this._gameInfo, gameState);
+      if (changed) console.info("GameInfo changed:", this._gameInfo);
+
+      [this._bidInfo, changed] = BidInfo.update(this._bidInfo, gameState);
+      if (changed) console.info("BidInfo changed:", this._bidInfo);
+
+      [this._chairs, changed] = Chairs.update(this._chairs, gameState);
+      if (changed) console.info("Chairs changed:", this._chairs);
+
+      [this._roundsInfo, changed] = RoundsInfo.update(this._roundsInfo, gameState);
+      if (changed) console.info("RoundsInfo changed:", this._roundsInfo);
+
+      // Update teams based on the current player and bid info
+      let biddingTeamNeeds: number = this._bidInfo.highBid;
+      let nonBiddingTeamNeeds: number = 57 - this._bidInfo.highBid;
+      if (this._bidInfo.highBid === 57) { // thani
+        biddingTeamNeeds = 8;
+        nonBiddingTeamNeeds = 1;
+      }
+  
+      const biddingTeam = this._bidInfo.highBidder % 2;
+      const isMyTeamBidding = biddingTeam === this._currentPlayer.team;
+
+      this._teams = [
+        {team: this._currentPlayer.team, 
+          myteam: true,
+          currentScore: this._roundsInfo.teamScore[this._currentPlayer.team],
+          winningScore: isMyTeamBidding ? biddingTeamNeeds : nonBiddingTeamNeeds,
+          coolieCount: this._gameInfo.coolieCount[this._currentPlayer.team]},
+        {team: 1-this._currentPlayer.team, 
+          myteam: false, 
+          currentScore: this._roundsInfo.teamScore[1-this._currentPlayer.team],
+          winningScore: isMyTeamBidding ? nonBiddingTeamNeeds : biddingTeamNeeds,
+          coolieCount: this._gameInfo.coolieCount[1-this._currentPlayer.team]}
+      ];
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Error parsing game state: ${errorMessage}`, jsonState);
+    }
+  }
+
   private registerEventHandlers(): void {
     // Private handling of OnError events
     this._hubConnection.on("OnError", (errorCode: number, hubMethodID: Cards56HubMethod, errorMessage: string, errorData: any) => {
@@ -176,33 +241,7 @@ export class Cards56Hub {
 
     // Private handling of OnStateUpdated events
     this._hubConnection.on("OnStateUpdated", (jsonState: string) => {
-      try {
-        // Parse JSON state only once
-        let changed = false;
-        var gameState = JSON.parse(jsonState);
-        
-        [this._tableInfo, changed] = TableInfo.update(this._tableInfo, gameState);
-        if (changed) console.info("TableInfo changed:", this._tableInfo);
-
-        [this._currentPlayer, changed] = CurrentPlayer.update(this._currentPlayer, gameState);
-        if (changed) console.info("CurrentPlayer changed:", this._currentPlayer);
-
-        [this._gameInfo, changed] = GameInfo.update(this._gameInfo, gameState);
-        if (changed) console.info("GameInfo changed:", this._gameInfo);
-
-        [this._bidInfo, changed] = BidInfo.update(this._bidInfo, gameState);
-        if (changed) console.info("BidInfo changed:", this._bidInfo);
-
-        [this._chairs, changed] = Chairs.update(this._chairs, gameState);
-        if (changed) console.info("Chairs changed:", this._chairs);
-
-        [this._roundsInfo, changed] = RoundsInfo.update(this._roundsInfo, gameState);
-        if (changed) console.info("RoundsInfo changed:", this._roundsInfo);
-
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error parsing game state: ${errorMessage}`, jsonState);
-      }
+      this.processState(jsonState);
     });
 
     // Private handler for OnRegisterPlayerCompleted

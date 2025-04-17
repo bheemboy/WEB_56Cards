@@ -1,9 +1,9 @@
 <script lang="ts">
-  const { team, myteam } = $props<{ team: number; myteam: boolean }>();
+  const { team, myteam, currentScore, winningScore} = $props<{ team: number; myteam: boolean; currentScore:number; winningScore:number}>();
 </script>
 
 <div class:hide-on-phone={!myteam}>
-  <div class="team-score" class:my-team={myteam}>23/54</div>
+  <div class="team-score" class:my-team={myteam}>{currentScore}/{winningScore}</div>
 </div>
 
 <style>

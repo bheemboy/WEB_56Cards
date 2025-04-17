@@ -2,7 +2,11 @@
 <script lang="ts">
   import { onMount, getContext } from "svelte";
   import { loginParams } from "../lib/LoginParams.svelte";
-  import { type Cards56Hub, ConnectionState, cards56HubContextKey } from "../lib/Cards56Hub.svelte";
+  import {
+    type Cards56Hub,
+    ConnectionState,
+    cards56HubContextKey,
+  } from "../lib/Cards56Hub.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
   import TeamScores from "../lib/TeamScores.svelte";
@@ -32,8 +36,6 @@
   });
 
   // Use effect to handle player registration when connection state changes
-  type Coolie = {team: number; coolieCount: number; myteam: boolean;};
-  let coolies: Coolie[] = $state([]);
 
   $effect(() => {
     if (hub.connectionState === ConnectionState.CONNECTED) {
@@ -41,23 +43,16 @@
         // Errors are now handled by the hub itself with alerts
       });
     }
-    coolies = [
-      {team: hub.currentPlayer.team, coolieCount: hub.gameInfo.coolieCount[hub.currentPlayer.team], myteam: true},
-      {team: 1-hub.currentPlayer.team, coolieCount: hub.gameInfo.coolieCount[1-hub.currentPlayer.team], myteam: false}
-    ];
-      
-    $inspect("hub.currentPlayer.team", hub.currentPlayer.team);
-    $inspect("hub.gameInfo.coolieCount", hub.gameInfo.coolieCount);
   });
-
-
-  </script>
+</script>
 
 <div class="table-container">
   {#if hub.currentPlayer.team >= 0}
-    {#each coolies as {team, coolieCount, myteam}}
-      <Coolies {team} {coolieCount} {myteam}/>
-      <TeamScores {team} {myteam}/>
+    {#each hub.teams as { team, myteam, currentScore, winningScore, coolieCount }}
+      <Coolies {team} {myteam} {coolieCount} />
+      {#if hub.gameInfo.gameStage >= 4 && !hub.gameInfo.gameCancelled && !hub.gameInfo.gameForfeited}
+        <TeamScores {team} {myteam} {currentScore} {winningScore} />
+      {/if}
     {/each}
   {/if}
 
@@ -70,7 +65,7 @@
     height: 99vh;
     max-width: 99vw;
     aspect-ratio: 1;
-    background-image: url('/images/table-background.jpg');
+    background-image: url("/images/table-background.jpg");
     background-size: cover;
     background-position: center;
     border: solid 2px brown;
