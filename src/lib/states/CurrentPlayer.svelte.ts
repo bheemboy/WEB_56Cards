@@ -78,7 +78,8 @@ export class CurrentPlayer {
   public get playerCards(): string[] { return [...this._playerCards]; }
   
   // Derived properties
-  public get team(): number { return this._playerPosition >= 0 ? this._playerPosition % 2 : -1; }
+  public get homeTeam(): number { return this._playerPosition >= 0 ? this._playerPosition % 2 : -1; }
+  public get opposingTeam(): number { return this._playerPosition >= 0 ? 1 - this._playerPosition % 2 : -1; }
   
   /**
    * Updates player data from a game state

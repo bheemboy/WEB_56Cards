@@ -47,11 +47,11 @@
 </script>
 
 <div class="table-container">
-  {#if hub.currentPlayer.team >= 0}
-    {#each hub.teams as { team, myteam, currentScore, winningScore, coolieCount }}
-      <Coolies {team} {myteam} {coolieCount} />
+  {#if hub.currentPlayer.homeTeam >= 0}
+    {#each hub.teams as { currentScore, winningScore, coolieCount }, index}
+      <Coolies team={index} homeTeam={hub.currentPlayer.homeTeam} {coolieCount} />
       {#if hub.gameInfo.gameStage >= 4 && !hub.gameInfo.gameCancelled && !hub.gameInfo.gameForfeited}
-        <TeamScores {team} {myteam} {currentScore} {winningScore} />
+        <TeamScores team={index} homeTeam={hub.currentPlayer.homeTeam} {currentScore} {winningScore} />
       {/if}
     {/each}
   {/if}

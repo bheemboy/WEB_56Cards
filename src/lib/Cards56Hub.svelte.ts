@@ -61,8 +61,6 @@ interface ErrorInfo {
 }
 
 export type TeamInfo = {
-  team: number;
-  myteam: boolean;
   currentScore: number;
   winningScore: number;
   coolieCount: number;};
@@ -201,27 +199,24 @@ export class Cards56Hub {
       if (changed) console.info("RoundsInfo changed:", this._roundsInfo);
 
       // Update teams based on the current player and bid info
-      let biddingTeamNeeds: number = this._bidInfo.highBid;
-      let nonBiddingTeamNeeds: number = 57 - this._bidInfo.highBid;
-      if (this._bidInfo.highBid === 57) { // thani
-        biddingTeamNeeds = 8;
-        nonBiddingTeamNeeds = 1;
-      }
-  
       const biddingTeam = this._bidInfo.highBidder % 2;
-      const isMyTeamBidding = biddingTeam === this._currentPlayer.team;
+      const isThani = this._bidInfo.highBid === 57;
+      let winningScores: number[] = [0, 0]; 
+      if (isThani) {
+        winningScores[biddingTeam] = 8;
+        winningScores[1-biddingTeam] = 1;
+      } else {
+        winningScores[biddingTeam] = this._bidInfo.highBid;
+        winningScores[1-biddingTeam] = 57 - this._bidInfo.highBid;
+      }
 
       this._teams = [
-        {team: this._currentPlayer.team, 
-          myteam: true,
-          currentScore: this._roundsInfo.teamScore[this._currentPlayer.team],
-          winningScore: isMyTeamBidding ? biddingTeamNeeds : nonBiddingTeamNeeds,
-          coolieCount: this._gameInfo.coolieCount[this._currentPlayer.team]},
-        {team: 1-this._currentPlayer.team, 
-          myteam: false, 
-          currentScore: this._roundsInfo.teamScore[1-this._currentPlayer.team],
-          winningScore: isMyTeamBidding ? nonBiddingTeamNeeds : biddingTeamNeeds,
-          coolieCount: this._gameInfo.coolieCount[1-this._currentPlayer.team]}
+        {currentScore: this._roundsInfo.teamScore[0],
+          winningScore: winningScores[0],
+          coolieCount: this._gameInfo.coolieCount[0]},
+        {currentScore: this._roundsInfo.teamScore[1],
+          winningScore: winningScores[1],
+          coolieCount: this._gameInfo.coolieCount[1]}
       ];
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
