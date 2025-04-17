@@ -60,11 +60,6 @@ interface ErrorInfo {
   errorData: any;
 }
 
-export type TeamInfo = {
-  currentScore: number;
-  winningScore: number;
-  coolieCount: number;};
-
 // Define a unique key for the context
 export const cards56HubContextKey = Symbol("cards56HubContext");
 
@@ -78,7 +73,6 @@ export class Cards56Hub {
   private _chairs: Chairs = $state<Chairs>(new Chairs());
   private _bidInfo: BidInfo = $state<BidInfo>(new BidInfo());
   private _roundsInfo: RoundsInfo = $state<RoundsInfo>(new RoundsInfo());
-  private _teams: TeamInfo[] = $state([]);
 
   // Get access to alert store for error handling
   private _alertStore = alertStoreInstance;
@@ -109,10 +103,6 @@ export class Cards56Hub {
 
   public get roundsInfo() {
     return this._roundsInfo;
-  }
-
-  public get teams() {
-    return this._teams;
   }
 
   // Static instance holder - create instance immediately
@@ -198,26 +188,6 @@ export class Cards56Hub {
       [this._roundsInfo, changed] = RoundsInfo.update(this._roundsInfo, gameState);
       if (changed) console.info("RoundsInfo changed:", this._roundsInfo);
 
-      // Update teams based on the current player and bid info
-      const biddingTeam = this._bidInfo.highBidder % 2;
-      const isThani = this._bidInfo.highBid === 57;
-      let winningScores: number[] = [0, 0]; 
-      if (isThani) {
-        winningScores[biddingTeam] = 8;
-        winningScores[1-biddingTeam] = 1;
-      } else {
-        winningScores[biddingTeam] = this._bidInfo.highBid;
-        winningScores[1-biddingTeam] = 57 - this._bidInfo.highBid;
-      }
-
-      this._teams = [
-        {currentScore: this._roundsInfo.teamScore[0],
-          winningScore: winningScores[0],
-          coolieCount: this._gameInfo.coolieCount[0]},
-        {currentScore: this._roundsInfo.teamScore[1],
-          winningScore: winningScores[1],
-          coolieCount: this._gameInfo.coolieCount[1]}
-      ];
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error(`Error parsing game state: ${errorMessage}`, jsonState);

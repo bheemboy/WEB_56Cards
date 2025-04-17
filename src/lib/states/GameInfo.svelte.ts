@@ -3,6 +3,12 @@
  * Extracts and maintains specific game information from game state
  * Optimized to minimize reactive updates
  */
+type TeamInfo = {
+  currentScore: number;
+  winningScore: number;
+  coolieCount: number;
+};
+
 export class GameInfo {
   // Define enum for GameStage
   public static GameStage = {
@@ -20,6 +26,10 @@ export class GameInfo {
   private _gameForfeited: boolean = false;
   private _dealerPos: number = 0;
   private _coolieCount: number[] = [0, 0];
+  private _teams: TeamInfo[] = [
+    {currentScore: 0, winningScore: 0, coolieCount: 0},
+    {currentScore: 0, winningScore: 0, coolieCount: 0}
+  ];;
 
   // Getters that don't trigger reactive updates on read
   public get gameStage(): number { return this._gameStage; }
@@ -27,7 +37,8 @@ export class GameInfo {
   public get gameForfeited(): boolean { return this._gameForfeited; }
   public get dealerPos(): number { return this._dealerPos; }
   public get coolieCount(): number[] { return [...this._coolieCount]; }
-  
+  public get teams(): TeamInfo[] { return this._teams; }
+
   /**
    * Updates the GameInfo with data from a game state JSON
    * @param game The existing GameInfo object
@@ -45,9 +56,39 @@ export class GameInfo {
     newGame._gameCancelled = tableInfo.GameCancelled !== undefined ? tableInfo.GameCancelled : false;
     newGame._gameForfeited = tableInfo.GameForfeited !== undefined ? tableInfo.GameForfeited : false;
     newGame._dealerPos = tableInfo.DealerPos !== undefined ? tableInfo.DealerPos : 0;
-    
+
     // Set coolieCount, ensuring we create a new array
     newGame._coolieCount = tableInfo.CoolieCount !== undefined ? [...tableInfo.CoolieCount] : [0, 0];
+
+    let winningScores: number[] = [0, 0];
+    if (tableInfo.Bid) {
+      const bidInfo = tableInfo.Bid;
+      const biddingTeam = bidInfo.HighBidder % 2;
+      const isThani = bidInfo.HighBid === 57;
+      if (isThani) {
+        winningScores[biddingTeam] = 8;
+        winningScores[1-biddingTeam] = 1;
+      } else {
+        winningScores[biddingTeam] = bidInfo.HighBid;
+        winningScores[1-biddingTeam] = 57 - bidInfo.HighBid;
+      }
+    }
+    console.log('Winning scores:', winningScores);
+
+    let teamScore: number[] = [0, 0];
+    // Update teamScore if available
+    if (tableInfo.TeamScore && Array.isArray(tableInfo.TeamScore)) {
+      teamScore = [...tableInfo.TeamScore];
+    }
+
+    newGame._teams = [
+      {currentScore: teamScore[0],
+        winningScore: winningScores[0],
+        coolieCount: newGame._coolieCount[0]},
+      {currentScore: teamScore[1],
+        winningScore: winningScores[1],
+        coolieCount: newGame._coolieCount[1]}
+    ];
 
     // Compare the new object with the existing one
     if (game && 
@@ -55,7 +96,8 @@ export class GameInfo {
         game._gameCancelled === newGame._gameCancelled &&
         game._gameForfeited === newGame._gameForfeited &&
         game._dealerPos === newGame._dealerPos &&
-        JSON.stringify(game._coolieCount) === JSON.stringify(newGame._coolieCount)) {
+        JSON.stringify(game._coolieCount) === JSON.stringify(newGame._coolieCount) &&
+        JSON.stringify(game._teams) === JSON.stringify(newGame._teams)) {
       return [game, false];
     }
     
@@ -71,13 +113,19 @@ export class GameInfo {
     gameForfeited: boolean;
     dealerPos: number;
     coolieCount: number[];
+    teams: TeamInfo[];
   } {
     return {
       gameStage: this._gameStage,
       gameCancelled: this._gameCancelled,
       gameForfeited: this._gameForfeited,
       dealerPos: this._dealerPos,
-      coolieCount: [...this._coolieCount]
+      coolieCount: [...this._coolieCount],
+      teams: this._teams.map(team => ({
+        currentScore: team.currentScore,
+        winningScore: team.winningScore,
+        coolieCount: team.coolieCount
+      }))
     };
   }
 }
