@@ -14,7 +14,7 @@ export interface Round {
  */
 export class RoundsInfo {
   private _rounds: Round[] = [];
-  private _teamScore: number[] = [];
+  private _teamScore: number[] = [0, 0];
 
   // Getters that don't trigger reactive updates on read
   public get rounds(): Round[] { return [...this._rounds]; }
