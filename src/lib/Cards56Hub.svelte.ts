@@ -244,7 +244,7 @@ export class Cards56Hub {
       try {
         this._connectionState = ConnectionState.CONNECTING;
         console.info("Attempting to connect to SignalR hub...");
-        this._alertStore.showInfo("Connecting to game server...");
+        // this._alertStore.showInfo("Connecting to game server...");
         await this._hubConnection.start();
         this._connectionState = ConnectionState.CONNECTED;
         console.info("Connected to 56cards websocket!");
