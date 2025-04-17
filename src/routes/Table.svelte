@@ -10,6 +10,7 @@
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
   import TeamScores from "../lib/TeamScores.svelte";
+    import Chair from "../lib/Chair.svelte";
 
   // Get the hub instance from the context
   const hub: Cards56Hub = getContext(cards56HubContextKey);
@@ -56,7 +57,13 @@
     {/each}
   {/if}
 
-  <CardsDeck bind:cards={hub.currentPlayer.playerCards} />
+  {#each hub.chairs.getAllChairs() as chair }
+    {#if chair.Position !== hub.currentPlayer.playerPosition}
+      <Chair {chair} currentPlayerPosition={hub.currentPlayer.playerPosition} />
+    {/if}
+  {/each}
+
+  <CardsDeck cards={hub.currentPlayer.playerCards} />
 </div>
 
 <style>

@@ -8,7 +8,7 @@
         percardtranslation?: number 
     }
 
-    let { cards = $bindable(), vh = 15, percardrotation = 13, percardtranslation = 1.8} : CardsDeckProps = $props();
+    let { cards, vh = 15, percardrotation = 13, percardtranslation = 1.8} : CardsDeckProps = $props();
 
     // The array of card data to use in the markup
     let cardsData: SvgCardProps[] = $state([]);
