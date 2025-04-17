@@ -5,7 +5,6 @@ export type AlertInfo = {
     type?: AlertType,
     title?: string,
     message?: string,
-    dismissible?: boolean,
     duration?: number,
     showDelay?: number,
 };
@@ -18,7 +17,6 @@ export const defaultAlertState: AlertInfo = {
     type: "hidden",
     title: "",
     message: "",
-    dismissible: true,
     duration: 2000,
     showDelay: 250
 };
@@ -31,34 +29,25 @@ export class AlertStore {
         return this._alertState;
     }
 
-    // Static instance holder - create instance immediately
+    // Singleton pattern implementation
     private static _instance = new AlertStore();
-
-    // Public static method to get the single instance
     public static getInstance(): AlertStore {
         return AlertStore._instance;
     }
     
-    // Private constructor to enforce singleton pattern
-    private constructor() {
-        // Singleton instance created
-    }
+    private constructor() {}
 
-    // Methods to show different types of alerts
+    // Show alert with specified properties
     public showAlert(info: AlertInfo): void {
-        // Clear any properties that aren't provided
-        const cleanInfo = { ...defaultAlertState };
-        // Override with new info
-        Object.assign(cleanInfo, info);
-        // Assign to state to trigger updates
-        this._alertState = cleanInfo;
+        this._alertState = { ...defaultAlertState, ...info };
     }
 
+    // Hide the current alert
     public hideAlert(): void {
-        // Only update the type property to hidden
         this._alertState = { ...this._alertState, type: "hidden" };
     }
 
+    // Convenience methods for common alert types
     public showSuccess(message: string, title?: string, duration?: number): void {
         this.showAlert({ 
             type: "success", 
@@ -96,10 +85,10 @@ export class AlertStore {
     }
 }
 
-// Create and export the singleton instance
+// Export the singleton instance
 export const alertStoreInstance: AlertStore = AlertStore.getInstance();
 
-// Get the alert context - kept for backward compatibility
+// For backward compatibility
 export function getAlertContext() {
     return alertStoreInstance;
 }

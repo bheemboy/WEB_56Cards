@@ -1,78 +1,144 @@
 <!-- Alert.svelte -->
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { alertStoreInstance } from './AlertStore.svelte';
   
-  // Get the alert instance directly
-  const alertStore = alertStoreInstance;
-  
-  // Create a reactive variable to track the alert state
+  // Create reactive variables
   let visible = $state(false);
-  let dismissTimer: ReturnType<typeof setTimeout> | undefined;
-  let showTimer: ReturnType<typeof setTimeout> | undefined;
-
+  let minimized = $state(false);
+  let initialDisplayTimeElapsed = $state(false);
+  let isTouchDevice = $state(false);
+  
+  // Timers
+  let showTimer: number | undefined;
+  let minimizeTimer: number | undefined;
+  let mediaQueryList: MediaQueryList | undefined;
+  
+  // Constants
+  const DEFAULT_MINIMIZE_DELAY = 3000;
+  
+  // Detect touch device
+  function checkTouchDevice() {
+    try {
+      // Check for touch capabilities and viewport size
+      const hasTouchPoints = navigator.maxTouchPoints > 0;
+      mediaQueryList = window.matchMedia('(pointer: coarse)');
+      const isCoarsePointer = mediaQueryList.matches;
+      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
+      
+      // Firefox responsive design mode detection
+      const isSimulated = /firefox/i.test(navigator.userAgent.toLowerCase()) && 
+                          (window.outerWidth !== window.innerWidth || window.devicePixelRatio !== 1);
+      
+      // Set device type
+      isTouchDevice = isSimulated ? (window.innerWidth <= 1024) : (hasTouchPoints || isCoarsePointer || isMobileUA);
+      
+      // Add listener for media query changes
+      mediaQueryList.addEventListener('change', checkTouchDevice);
+    } catch (e) {
+      isTouchDevice = true; // Default to touch device if detection fails
+    }
+  }
+  
   function dismissAlert() {
     visible = false;
+    minimized = false;
     clearTimers();
-    alertStore.hideAlert();
+    alertStoreInstance.hideAlert();
+  }
+
+  function minimizeAlert() {
+    if (!isTouchDevice) minimized = true;
+  }
+
+  function maximizeAlert() {
+    minimized = false;
+    if (minimizeTimer) {
+      clearTimeout(minimizeTimer);
+      minimizeTimer = undefined;
+    }
   }
 
   function clearTimers() {
-    if (dismissTimer) {
-      clearTimeout(dismissTimer);
-      dismissTimer = undefined;
-    }
-    if (showTimer) {
-      clearTimeout(showTimer);
-      showTimer = undefined;
+    if (showTimer) clearTimeout(showTimer);
+    if (minimizeTimer) clearTimeout(minimizeTimer);
+    showTimer = minimizeTimer = undefined;
+  }
+
+  function handleMouseLeave() {
+    if (!isTouchDevice && visible && !minimized && initialDisplayTimeElapsed) {
+      minimizeTimer = setTimeout(minimizeAlert, 500);
     }
   }
 
-  // Reactively watch the alert state
-  $effect(() => {
-    // Get the current state directly on each effect run
-    const currentState = alertStore.state;
-    
-    // Clear any existing timers
-    clearTimers();
-    
-    if (currentState.type === "hidden") {
-      visible = false;
-    } else {
-      // Show the alert
-      showTimer = setTimeout(() => {
-        visible = true;
-        
-        if (currentState.duration && currentState.duration > 0) {
-          dismissTimer = setTimeout(() => {
-            visible = false;
-            alertStore.hideAlert();
-          }, currentState.duration);
-        }
-      }, currentState.showDelay || 250);
+  function handleMouseEnter() {
+    if (minimizeTimer) {
+      clearTimeout(minimizeTimer);
+      minimizeTimer = undefined;
     }
+    if (minimized) maximizeAlert();
+  }
+
+  // Set up alert reactively
+  $effect(() => {
+    const state = alertStoreInstance.state;
+    clearTimers();
+    initialDisplayTimeElapsed = false;
+    
+    if (state.type === "hidden") {
+      visible = minimized = false;
+      return;
+    }
+    
+    // Show the alert
+    showTimer = setTimeout(() => {
+      visible = true;
+      minimized = false;
+      
+      // Set timer for auto-minimize (desktop only)
+      if (!isTouchDevice) {
+        const minimizeDelay = (state.duration && state.duration > 0) 
+          ? state.duration 
+          : DEFAULT_MINIMIZE_DELAY;
+          
+        setTimeout(() => {
+          initialDisplayTimeElapsed = true;
+          if (!isTouchDevice) minimizeAlert();
+        }, minimizeDelay);
+      } else {
+        initialDisplayTimeElapsed = true;
+      }
+    }, state.showDelay || 250);
   });
 
-  onDestroy(clearTimers);
+  // Initialize on mount and clean up on destroy
+  onMount(() => {
+    checkTouchDevice();
+    window.addEventListener('resize', checkTouchDevice);
+  });
+  
+  onDestroy(() => {
+    clearTimers();
+    if (mediaQueryList) mediaQueryList.removeEventListener('change', checkTouchDevice);
+    window.removeEventListener('resize', checkTouchDevice);
+  });
 </script>
 
-{#if visible && alertStore.state.type !== "hidden"}
-  <div class={`floating-alert alert alert-${alertStore.state.type} ${alertStore.state.dismissible ? 'alert-dismissible' : ''} fade show`} role="alert">
+{#if visible && alertStoreInstance.state.type !== "hidden"}
+  <div 
+    class="floating-alert {minimized ? 'minimized' : ''} alert alert-{alertStoreInstance.state.type} fade show" 
+    role="alert"
+    onmouseenter={handleMouseEnter}
+    onmouseleave={handleMouseLeave}
+  >
     <div class="alert-content">
-      {#if alertStore.state.title}<strong>{alertStore.state.title}</strong> {/if}
-      {#if alertStore.state.message}{alertStore.state.message}{/if}
+      {#if alertStoreInstance.state.title}<strong>{alertStoreInstance.state.title}</strong> {/if}
+      {#if alertStoreInstance.state.message}{alertStoreInstance.state.message}{/if}
     </div>
     
-    {#if alertStore.state.dismissible !== false}
-      <button 
-        type="button" 
-        class="close-button" 
-        onclick={dismissAlert} 
-        aria-label="Close"
-      >
-        <span class="close-icon">×</span>
-      </button>
-    {/if}
+    <button type="button" class="close-button" onclick={dismissAlert} aria-label="Close">
+      <span class="close-icon">×</span>
+    </button>
   </div>
 {/if}
 
@@ -91,6 +157,23 @@
     justify-content: space-between;
     align-items: center;
     padding-right: 20px;
+    transition: height 0.8s ease-in-out, opacity 0.6s ease-in-out, padding 0.8s ease-in-out;
+    min-height: 40px;
+    overflow: hidden;
+  }
+
+  .floating-alert.minimized {
+    height: 0.6vh;
+    min-height: 6px;
+    max-height: 8px;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  .floating-alert.minimized .alert-content,
+  .floating-alert.minimized .close-button {
+    display: none;
   }
 
   .alert {
@@ -102,6 +185,7 @@
   .alert-content {
     flex-grow: 1;
     font-size: 0.9rem;
+    padding: 0.5rem 0;
   }
   
   .close-button {
@@ -125,6 +209,7 @@
     font-size: 1.3rem;
   }
   
+  /* Alert variants */
   .alert-warning {
     color: #856404;
     background-color: #fff3cd;
