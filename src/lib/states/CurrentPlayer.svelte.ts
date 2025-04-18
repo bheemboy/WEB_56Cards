@@ -4,7 +4,24 @@
  */
 
 // Define interfaces for better type safety
-interface GameState {
+export interface PlayerInfo {
+  PlayerID: string;
+  Name?: string;
+  Lang?: string;
+  WatchOnly?: boolean;
+}
+
+export interface Chair {
+  Position: number;
+  Occupant?: PlayerInfo;
+  Watchers?: PlayerInfo[];
+}
+
+export interface TableInfo {
+  Chairs?: Chair[];
+}
+
+export interface GameState {
   PlayerID?: string;
   PlayerPosition?: number;
   PlayerCards?: string[];
@@ -12,61 +29,42 @@ interface GameState {
   TableInfo?: TableInfo;
 }
 
-interface TableInfo {
-  Chairs?: Chair[];
-}
-
-interface Chair {
-  Position: number;
-  Occupant?: PlayerInfo;
-  Watchers?: PlayerInfo[];
-}
-
-interface PlayerInfo {
-  PlayerID: string;
-  Name?: string;
-  Lang?: string;
+export interface CurrentPlayerProps {
+  playerID: string;
+  name: string;
+  lang: string;
+  watchOnly: boolean;
+  playerPosition: number;
+  playerCards: string[];
 }
 
 export class CurrentPlayer {
-  // Private fields
+  // Private readonly fields
   private readonly _playerID: string;
   private readonly _name: string;
   private readonly _lang: string;
   private readonly _watchOnly: boolean;
   private readonly _playerPosition: number;
-  private readonly _playerCards: readonly string[];
+  private readonly _playerCards: ReadonlyArray<string>;
 
   /**
-   * Create a new CurrentPlayer instance
-   * @param playerID - Player's unique identifier
-   * @param name - Player's display name
-   * @param lang - Player's preferred language
-   * @param watchOnly - Whether player is only watching
-   * @param playerPosition - Player's position at table
-   * @param playerCards - Cards in player's hand
+   * Private constructor - use factory methods to create instances
    */
-  constructor({
+  private constructor({
     playerID = '',
     name = '',
     lang = '',
     watchOnly = false,
     playerPosition = -1,
     playerCards = [],
-  }: {
-    playerID?: string;
-    name?: string;
-    lang?: string;
-    watchOnly?: boolean;
-    playerPosition?: number;
-    playerCards?: string[];
-  } = {}) {
+  }: Partial<CurrentPlayerProps> = {}) {
     this._playerID = playerID;
     this._name = name;
     this._lang = lang;
     this._watchOnly = watchOnly;
     this._playerPosition = playerPosition;
-    this._playerCards = [...playerCards];
+    // Create a frozen copy of the array
+    this._playerCards = Object.freeze([...playerCards]);
   }
 
   // Read-only getters
@@ -75,12 +73,24 @@ export class CurrentPlayer {
   public get lang(): string { return this._lang; }
   public get watchOnly(): boolean { return this._watchOnly; }
   public get playerPosition(): number { return this._playerPosition; }
-  public get playerCards(): string[] { return [...this._playerCards]; }
+  public get playerCards(): ReadonlyArray<string> { return this._playerCards; }
   
   // Derived properties
-  public get homeTeam(): number { return this._playerPosition >= 0 ? this._playerPosition % 2 : -1; }
-  public get opposingTeam(): number { return this._playerPosition >= 0 ? 1 - this._playerPosition % 2 : -1; }
+  public get homeTeam(): number { 
+    return this._playerPosition >= 0 ? this._playerPosition % 2 : -1; 
+  }
   
+  public get opposingTeam(): number { 
+    return this._playerPosition >= 0 ? 1 - this._playerPosition % 2 : -1; 
+  }
+  
+  /**
+   * Factory method to create a default CurrentPlayer instance
+   */
+  public static create(): CurrentPlayer {
+    return new CurrentPlayer();
+  }
+
   /**
    * Updates player data from a game state
    * Returns a tuple with [updatedPlayer, wasUpdated]
@@ -93,67 +103,90 @@ export class CurrentPlayer {
       return [player ?? new CurrentPlayer(), false];
     }
 
-    // Extract base player data
-    const playerID = gameState.PlayerID ?? '';
-    const playerPosition = gameState.PlayerPosition ?? -1;
-    const playerCards = gameState.PlayerCards ? [...gameState.PlayerCards] : [];
-    const watchOnly = gameState.WatchOnly ?? false;
-
-    // Find player info in table data
-    let name = '';
-    let lang = '';
-
-    if (gameState.TableInfo?.Chairs && playerPosition !== -1) {
-      const chair = gameState.TableInfo.Chairs.find(
-        chair => chair.Position === playerPosition
-      );
+    try {
+      // Extract base player data with type safety
+      const playerID = typeof gameState.PlayerID === 'string' ? gameState.PlayerID : '';
+      const playerPosition = typeof gameState.PlayerPosition === 'number' ? gameState.PlayerPosition : -1;
+      const watchOnly = !!gameState.WatchOnly;
       
-      if (chair) {
-        const playerInfo = watchOnly
-          ? chair.Watchers?.find(watcher => watcher.PlayerID === playerID)
-          : chair.Occupant;
+      // Safely handle player cards
+      const playerCards = Array.isArray(gameState.PlayerCards) 
+        ? gameState.PlayerCards.filter(card => typeof card === 'string')
+        : [];
+
+      // Find player info in table data
+      let name = '';
+      let lang = '';
+
+      if (gameState.TableInfo?.Chairs && playerPosition !== -1) {
+        const chairs = gameState.TableInfo.Chairs;
+        if (Array.isArray(chairs)) {
+          const chair = chairs.find(chair => chair.Position === playerPosition);
           
-        if (playerInfo) {
-          name = playerInfo.Name ?? '';
-          lang = playerInfo.Lang ?? '';
+          if (chair) {
+            if (watchOnly && Array.isArray(chair.Watchers)) {
+              const playerInfo = chair.Watchers.find(watcher => watcher.PlayerID === playerID);
+              if (playerInfo) {
+                name = typeof playerInfo.Name === 'string' ? playerInfo.Name : '';
+                lang = typeof playerInfo.Lang === 'string' ? playerInfo.Lang : '';
+              }
+            } else if (!watchOnly && chair.Occupant) {
+              name = typeof chair.Occupant.Name === 'string' ? chair.Occupant.Name : '';
+              lang = typeof chair.Occupant.Lang === 'string' ? chair.Occupant.Lang : '';
+            }
+          }
         }
       }
+
+      // Create new player instance
+      const newPlayer = new CurrentPlayer({
+        playerID,
+        name,
+        lang,
+        watchOnly,
+        playerPosition,
+        playerCards
+      });
+
+      // Check if anything changed
+      const hasChanged = 
+        !player ||
+        player.playerID !== newPlayer.playerID ||
+        player.name !== newPlayer.name ||
+        player.lang !== newPlayer.lang ||
+        player.watchOnly !== newPlayer.watchOnly ||
+        player.playerPosition !== newPlayer.playerPosition ||
+        !areArraysEqual(player.playerCards, newPlayer.playerCards);
+
+      return [hasChanged ? newPlayer : player, hasChanged];
+    } catch (error) {
+      console.error('Error updating CurrentPlayer:', error);
+      return [player ?? new CurrentPlayer(), false];
     }
-
-    // Create new player instance
-    const newPlayer = new CurrentPlayer({
-      playerID,
-      name,
-      lang,
-      watchOnly,
-      playerPosition,
-      playerCards
-    });
-
-    // Check if anything changed
-    const hasChanged = 
-      !player ||
-      player.playerID !== newPlayer.playerID ||
-      player.name !== newPlayer.name ||
-      player.lang !== newPlayer.lang ||
-      player.watchOnly !== newPlayer.watchOnly ||
-      player.playerPosition !== newPlayer.playerPosition ||
-      !areArraysEqual(player.playerCards, newPlayer.playerCards);
-
-    return [hasChanged ? newPlayer : player, hasChanged];
   }
 
   /**
    * Creates a plain object representation of the CurrentPlayer
    */
-  public toJSON() {
+  public toJSON(): {
+    playerID: string;
+    name: string;
+    lang: string;
+    watchOnly: boolean;
+    playerPosition: number;
+    playerCards: string[];
+    homeTeam: number;
+    opposingTeam: number;
+  } {
     return {
       playerID: this._playerID,
       name: this._name,
       lang: this._lang,
       watchOnly: this._watchOnly,
       playerPosition: this._playerPosition,
-      playerCards: [...this._playerCards]
+      playerCards: [...this._playerCards],
+      homeTeam: this.homeTeam,
+      opposingTeam: this.opposingTeam
     };
   }
 }
@@ -161,7 +194,8 @@ export class CurrentPlayer {
 /**
  * Helper function to compare arrays without serializing
  */
-function areArraysEqual<T>(a: T[], b: T[]): boolean {
+function areArraysEqual<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>): boolean {
+  if (a === b) return true;
   if (a.length !== b.length) return false;
   return a.every((val, idx) => val === b[idx]);
 }

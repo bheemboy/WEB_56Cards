@@ -1,63 +1,115 @@
 /**
- * Round interface to represent a single round of play
+ * RoundsInfo class for Svelte component
+ * Extracts and maintains rounds information from game state
+ * Optimized to minimize reactive updates with improved type safety
  */
+
+// Define proper interfaces for better type safety
 export interface Round {
   FirstPlayer: number;
   NextPlayer: number;
   PlayedCards: string[];
+  TrumpExposed?: boolean[];
+  Winner?: number;
+  Score?: number;
+  AutoPlayNextCard?: string;
 }
 
-/**
- * RoundsInfo class for Svelte component
- * Extracts and maintains rounds information from game state
- * Optimized to minimize reactive updates
- */
+export interface TableInfoData {
+  Rounds?: Round[];
+  TeamScore?: number[];
+  [key: string]: any;
+}
+
+export interface GameState {
+  TableInfo?: TableInfoData;
+  [key: string]: any;
+}
+
 export class RoundsInfo {
-  private _rounds: Round[] = [];
-  private _teamScore: number[] = [0, 0];
+  // Using readonly for immutability
+  private readonly _rounds: ReadonlyArray<Round>;
+  private readonly _teamScore: ReadonlyArray<number>;
+
+  /**
+   * Private constructor - use factory methods to create instances
+   */
+  private constructor(
+    rounds: Round[] = [],
+    teamScore: number[] = [0, 0]
+  ) {
+    // Create defensive copies with proper validation
+    this._rounds = Object.freeze(rounds.map(round => ({
+      FirstPlayer: typeof round.FirstPlayer === 'number' ? round.FirstPlayer : 0,
+      NextPlayer: typeof round.NextPlayer === 'number' ? round.NextPlayer : 0,
+      PlayedCards: Array.isArray(round.PlayedCards) ? [...round.PlayedCards] : [],
+      TrumpExposed: Array.isArray(round.TrumpExposed) ? [...round.TrumpExposed] : undefined,
+      Winner: typeof round.Winner === 'number' ? round.Winner : undefined,
+      Score: typeof round.Score === 'number' ? round.Score : undefined,
+      AutoPlayNextCard: typeof round.AutoPlayNextCard === 'string' ? round.AutoPlayNextCard : undefined
+    })));
+    
+    // Validate teamScore array
+    this._teamScore = Object.freeze(
+      teamScore.length >= 2 ? 
+      [
+        typeof teamScore[0] === 'number' ? teamScore[0] : 0,
+        typeof teamScore[1] === 'number' ? teamScore[1] : 0
+      ] : 
+      [0, 0]
+    );
+  }
 
   // Getters that don't trigger reactive updates on read
-  public get rounds(): Round[] { return [...this._rounds]; }
-  public get teamScore(): number[] { return [...this._teamScore]; }
+  public get rounds(): ReadonlyArray<Round> { return this._rounds; }
+  public get teamScore(): ReadonlyArray<number> { return this._teamScore; }
   
   /**
+   * Get the current round or undefined if no rounds exist
+   */
+  public get currentRound(): Round | undefined {
+    return this._rounds.length > 0 ? this._rounds[this._rounds.length - 1] : undefined;
+  }
+
+  /**
+   * Factory method to create a default RoundsInfo instance
+   */
+  public static create(): RoundsInfo {
+    return new RoundsInfo();
+  }
+
+  /**
    * Updates the RoundsInfo with data from a game state JSON
-   * @param rounds The existing RoundsInfo object
+   * @param rounds The existing RoundsInfo object or undefined
    * @param gameState The parsed game state JSON object
    * @returns [RoundsInfo, boolean] pair with new or existing RoundsInfo and whether it changed
    */
-  public static update(rounds: RoundsInfo, gameState: any): [RoundsInfo, boolean] {
-    let newRounds = new RoundsInfo();
+  public static update(rounds: RoundsInfo | undefined, gameState: GameState): [RoundsInfo, boolean] {
+    if (!gameState) {
+      console.warn('Invalid game state provided');
+      return [rounds || new RoundsInfo(), false];
+    }
 
-    // Extract TableInfo data from the root or from TableInfo property
-    const tableInfo = gameState.TableInfo || gameState;
-    
-    // Update rounds if available
-    if (tableInfo.Rounds && Array.isArray(tableInfo.Rounds)) {
-      // Create simplified rounds with only the fields we need
-      const simplifiedRounds = tableInfo.Rounds.map((round: any) => ({
-        FirstPlayer: round.FirstPlayer,
-        NextPlayer: round.NextPlayer,
-        PlayedCards: [...round.PlayedCards]
-      }));
+    try {
+      // Extract TableInfo data from the root or from TableInfo property
+      const tableInfo: TableInfoData = gameState.TableInfo || gameState;
       
-      // Store the rounds in the new object
-      newRounds._rounds = JSON.parse(JSON.stringify(simplifiedRounds));
+      // Create a new instance with extracted data
+      const newRounds = new RoundsInfo(
+        Array.isArray(tableInfo.Rounds) ? tableInfo.Rounds : [],
+        Array.isArray(tableInfo.TeamScore) ? tableInfo.TeamScore : [0, 0]
+      );
+      
+      // Compare with existing RoundsInfo if available
+      if (rounds && areRoundsEqual(rounds, newRounds)) {
+        return [rounds, false];
+      }
+      
+      return [newRounds, true];
+    } catch (error) {
+      console.error('Error updating RoundsInfo:', error);
+      return [rounds || new RoundsInfo(), false];
     }
-
-    // Update teamScore if available
-    if (tableInfo.TeamScore && Array.isArray(tableInfo.TeamScore)) {
-      newRounds._teamScore = [...tableInfo.TeamScore];
-    }
-
-    // Compare the new object with the existing one
-    if (rounds && 
-        JSON.stringify(rounds._rounds) === JSON.stringify(newRounds._rounds) &&
-        JSON.stringify(rounds._teamScore) === JSON.stringify(newRounds._teamScore)) {
-      return [rounds, false];
-    }
-    
-    return [newRounds, true];
   }
 
   /**
@@ -66,10 +118,92 @@ export class RoundsInfo {
   public toJSON(): {
     rounds: Round[];
     teamScore: number[];
+    currentRound?: Round;
   } {
     return {
-      rounds: JSON.parse(JSON.stringify(this._rounds)),
-      teamScore: [...this._teamScore]
+      rounds: this._rounds.map(round => ({
+        FirstPlayer: round.FirstPlayer,
+        NextPlayer: round.NextPlayer,
+        PlayedCards: [...round.PlayedCards],
+        TrumpExposed: round.TrumpExposed ? [...round.TrumpExposed] : undefined,
+        Winner: round.Winner,
+        Score: round.Score,
+        AutoPlayNextCard: round.AutoPlayNextCard
+      })),
+      teamScore: [...this._teamScore],
+      currentRound: this.currentRound ? {
+        FirstPlayer: this.currentRound.FirstPlayer,
+        NextPlayer: this.currentRound.NextPlayer,
+        PlayedCards: [...this.currentRound.PlayedCards],
+        TrumpExposed: this.currentRound.TrumpExposed ? [...this.currentRound.TrumpExposed] : undefined,
+        Winner: this.currentRound.Winner,
+        Score: this.currentRound.Score,
+        AutoPlayNextCard: this.currentRound.AutoPlayNextCard
+      } : undefined
     };
   }
+}
+
+/**
+ * Helper function to check if two RoundsInfo objects are equal
+ */
+function areRoundsEqual(a: RoundsInfo, b: RoundsInfo): boolean {
+  // Compare team scores
+  if (a.teamScore.length !== b.teamScore.length) {
+    return false;
+  }
+  
+  for (let i = 0; i < a.teamScore.length; i++) {
+    if (a.teamScore[i] !== b.teamScore[i]) {
+      return false;
+    }
+  }
+
+  // Compare rounds
+  if (a.rounds.length !== b.rounds.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.rounds.length; i++) {
+    const roundA = a.rounds[i];
+    const roundB = b.rounds[i];
+    
+    // Compare basic properties
+    if (roundA.FirstPlayer !== roundB.FirstPlayer ||
+        roundA.NextPlayer !== roundB.NextPlayer ||
+        roundA.Winner !== roundB.Winner ||
+        roundA.Score !== roundB.Score ||
+        roundA.AutoPlayNextCard !== roundB.AutoPlayNextCard) {
+      return false;
+    }
+    
+    // Compare PlayedCards arrays
+    if (roundA.PlayedCards.length !== roundB.PlayedCards.length) {
+      return false;
+    }
+    
+    for (let j = 0; j < roundA.PlayedCards.length; j++) {
+      if (roundA.PlayedCards[j] !== roundB.PlayedCards[j]) {
+        return false;
+      }
+    }
+    
+    // Compare TrumpExposed arrays if they exist
+    if (Array.isArray(roundA.TrumpExposed) && Array.isArray(roundB.TrumpExposed)) {
+      if (roundA.TrumpExposed.length !== roundB.TrumpExposed.length) {
+        return false;
+      }
+      
+      for (let j = 0; j < roundA.TrumpExposed.length; j++) {
+        if (roundA.TrumpExposed[j] !== roundB.TrumpExposed[j]) {
+          return false;
+        }
+      }
+    } else if (roundA.TrumpExposed !== roundB.TrumpExposed) {
+      // One is array, one is undefined
+      return false;
+    }
+  }
+  
+  return true;
 }

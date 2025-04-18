@@ -15,24 +15,28 @@ export enum GameStage {
 }
 
 export interface TeamInfo {
-  currentScore: number;
-  scoreNeeded: number;
-  coolieCount: number;
+  readonly currentScore: number;
+  readonly scoreNeeded: number;
+  readonly coolieCount: number;
+}
+
+export interface BidInfo {
+  readonly HighBid?: number;
+  readonly HighBidder?: number;
+}
+
+export interface TableInfoData {
+  readonly GameCancelled?: boolean;
+  readonly GameForfeited?: boolean;
+  readonly DealerPos?: number;
+  readonly CoolieCount?: number[];
+  readonly TeamScore?: number[];
+  readonly Bid?: BidInfo;
 }
 
 export interface GameState {
-  GameStage?: number;
-  TableInfo?: {
-    GameCancelled?: boolean;
-    GameForfeited?: boolean;
-    DealerPos?: number;
-    CoolieCount?: number[];
-    TeamScore?: number[];
-    Bid?: {
-      HighBid?: number;
-      HighBidder?: number;
-    };
-  };
+  readonly GameStage?: number;
+  readonly TableInfo?: TableInfoData;
 }
 
 export class GameInfo {
@@ -41,8 +45,8 @@ export class GameInfo {
   private readonly _gameCancelled: boolean;
   private readonly _gameForfeited: boolean;
   private readonly _dealerPos: number;
-  private readonly _coolieCount: readonly number[];
-  private readonly _teams: readonly TeamInfo[];
+  private readonly _coolieCount: ReadonlyArray<number>;
+  private readonly _teams: ReadonlyArray<TeamInfo>;
 
   /**
    * Private constructor - use factory methods to create instances
@@ -86,11 +90,11 @@ export class GameInfo {
     return this._dealerPos;
   }
 
-  public get coolieCount(): readonly number[] {
+  public get coolieCount(): ReadonlyArray<number> {
     return this._coolieCount;
   }
 
-  public get teams(): readonly TeamInfo[] {
+  public get teams(): ReadonlyArray<TeamInfo> {
     return this._teams;
   }
 
@@ -102,21 +106,71 @@ export class GameInfo {
   }
 
   /**
+   * Calculate the score needed for each team based on bid information
+   * @param bidInfo The bid information from the game state
+   * @returns An array of score needed for each team
+   */
+  private static calculateScoreNeeded(bidInfo?: BidInfo): [number, number] {
+    if (!bidInfo || typeof bidInfo.HighBid !== 'number' || typeof bidInfo.HighBidder !== 'number') {
+      return [0, 0];
+    }
+
+    const biddingTeam = bidInfo.HighBidder % 2;
+    const isThani = bidInfo.HighBid === 57;
+    
+    if (isThani) {
+      return biddingTeam === 0 ? [8, 1] : [1, 8];
+    } else {
+      const highBid = Math.max(0, Math.min(57, bidInfo.HighBid)); // Clamp bid value
+      return biddingTeam === 0 
+        ? [highBid, 57 - highBid] 
+        : [57 - highBid, highBid];
+    }
+  }
+
+  /**
+   * Deep equality check for GameInfo objects
+   */
+  private static isEqual(a: GameInfo, b: GameInfo): boolean {
+    if (a === b) return true;
+    
+    return (
+      a._gameStage === b._gameStage &&
+      a._gameCancelled === b._gameCancelled &&
+      a._gameForfeited === b._gameForfeited &&
+      a._dealerPos === b._dealerPos &&
+      a._coolieCount.length === b._coolieCount.length &&
+      a._coolieCount.every((val, i) => val === b._coolieCount[i]) &&
+      a._teams.length === b._teams.length &&
+      a._teams.every((team, i) => (
+        team.currentScore === b._teams[i].currentScore &&
+        team.scoreNeeded === b._teams[i].scoreNeeded &&
+        team.coolieCount === b._teams[i].coolieCount
+      ))
+    );
+  }
+
+  /**
    * Updates the GameInfo with data from a game state JSON
-   * @param game The existing GameInfo object
+   * @param game The existing GameInfo object or undefined
    * @param gameState The parsed game state JSON object
    * @returns [GameInfo, boolean] pair with new GameInfo and whether it changed
    */
-  public static update(game: GameInfo, gameState: GameState): [GameInfo, boolean] {
+  public static update(game: GameInfo | undefined, gameState: GameState): [GameInfo, boolean] {
+    if (!gameState) {
+      console.warn('Invalid game state provided');
+      return [game || new GameInfo(), false];
+    }
+
     try {
       // Safely extract values with defaults to handle malformed data
       const tableInfo = gameState?.TableInfo || {};
       
-      const gameStage = typeof gameState.GameStage === 'number' && 
-                        gameState.GameStage >= 0 && 
-                        gameState.GameStage <= 5 
-                        ? gameState.GameStage as GameStage 
-                        : GameStage.Unknown;
+      // Ensure GameStage is a valid enum value
+      const gameStage: GameStage = typeof gameState.GameStage === 'number' && 
+                      GameStage[gameState.GameStage as GameStage] !== undefined
+                      ? gameState.GameStage as GameStage 
+                      : GameStage.Unknown;
       
       const gameCancelled = !!tableInfo.GameCancelled;
       const gameForfeited = !!tableInfo.GameForfeited;
@@ -173,52 +227,9 @@ export class GameInfo {
       return [newGame, true];
     } catch (error) {
       console.error('Error updating game info:', error);
-      // Return a new default game info object in case of error
-      return [new GameInfo(), true];
+      // Return existing or new default game info object in case of error
+      return [game || new GameInfo(), false];
     }
-  }
-
-  /**
-   * Calculate the score needed for each team based on bid information
-   * @param bidInfo The bid information from the game state
-   * @returns An array of score needed for each team
-   */
-  private static calculateScoreNeeded(bidInfo: any): [number, number] {
-    if (!bidInfo || typeof bidInfo.HighBid !== 'number' || typeof bidInfo.HighBidder !== 'number') {
-      return [0, 0];
-    }
-
-    const biddingTeam = bidInfo.HighBidder % 2;
-    const isThani = bidInfo.HighBid === 57;
-    
-    if (isThani) {
-      return biddingTeam === 0 ? [8, 1] : [1, 8];
-    } else {
-      const highBid = Math.max(0, Math.min(57, bidInfo.HighBid)); // Clamp bid value
-      return biddingTeam === 0 
-        ? [highBid, 57 - highBid] 
-        : [57 - highBid, highBid];
-    }
-  }
-
-  /**
-   * Deep equality check for GameInfo objects
-   */
-  private static isEqual(a: GameInfo, b: GameInfo): boolean {
-    return (
-      a._gameStage === b._gameStage &&
-      a._gameCancelled === b._gameCancelled &&
-      a._gameForfeited === b._gameForfeited &&
-      a._dealerPos === b._dealerPos &&
-      a._coolieCount.length === b._coolieCount.length &&
-      a._coolieCount.every((val, i) => val === b._coolieCount[i]) &&
-      a._teams.length === b._teams.length &&
-      a._teams.every((team, i) => (
-        team.currentScore === b._teams[i].currentScore &&
-        team.scoreNeeded === b._teams[i].scoreNeeded &&
-        team.coolieCount === b._teams[i].coolieCount
-      ))
-    );
   }
 
   /**
