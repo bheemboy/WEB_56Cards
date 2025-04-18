@@ -1,5 +1,5 @@
 import { ConnectionState, HubConnector } from "./HubConnection.svelte";
-import { loginParams } from "./LoginParams.svelte";
+import { type LoginParamsData, LoginParams } from "./LoginParams.svelte";
 import { alertStoreInstance } from "./AlertStore.svelte";
 import { TableInfo } from "./states/TableInfo.svelte";
 import { CurrentPlayer } from "./states/CurrentPlayer.svelte";
@@ -41,6 +41,7 @@ export interface ErrorInfo {
 
 export class GameController {
   private _hubConnector: HubConnector;
+  private _loginParams: LoginParams = $state<LoginParams>(LoginParams.create());
   private _playerId: string | null = null;
   private _tableInfo: TableInfo = $state<TableInfo>(TableInfo.create());
   private _currentPlayer: CurrentPlayer = $state<CurrentPlayer>(CurrentPlayer.create());
@@ -56,6 +57,10 @@ export class GameController {
     return this._hubConnector.connectionState;
   }
 
+  public get loginParams() {
+    return this._loginParams;
+  }
+
   public get tableInfo() {
     return this._tableInfo;
   }
@@ -66,12 +71,12 @@ export class GameController {
 
   public get gameInfo() {
     return this._gameInfo;
-  }  
+  }
 
   public get chairs() {
     return this._chairs;
   }
-  
+
   public get bidInfo() {
     return this._bidInfo;
   }
@@ -94,7 +99,7 @@ export class GameController {
   private constructor() {
     let hubUrl = 'https://play.56cards.com/Cards56Hub';
     // let hubUrl = '/Cards56Hub';
-  
+
     // if (window.location.hostname.toLowerCase() === 'localhost') {
     //   hubUrl = 'http://localhost:8080/Cards56Hub';
     // }
@@ -103,10 +108,31 @@ export class GameController {
     this.registerEventHandlers();
 
     // Connect automatically
-    this._hubConnector.connect().catch((err: unknown) => {
-      this._alertStore.showError("Could not connect to Cards56Hub on server.", "Fatal error: ", 0);
-      console.error("Failed to connect to SignalR hub:", err);
-    });
+    // this._hubConnector.connect().catch((err: unknown) => {
+    //   this._alertStore.showError("Could not connect to Cards56Hub on server.", "Fatal error: ", 0);
+    //   console.error("Failed to connect to SignalR hub:", err);
+    // });
+  }
+
+  // Method to update login params - SIMPLIFIED
+  public async updateLoginParams(newData: Partial<LoginParamsData>): Promise<void> {
+    const [updatedParams, changed] = LoginParams.update(this._loginParams, newData);
+    if (changed) {
+      this._loginParams = updatedParams;
+      console.info("LoginParams changed:", this._loginParams);
+
+      // Just disconnect if we have a player ID - Table.svelte will handle reconnection
+      if (this._playerId) {
+        try {
+          await this._hubConnector.disconnect();
+        } catch (err) {
+          console.error("Error during disconnect:", err);
+        }
+
+        // Reset player ID
+        this._playerId = null;
+      }
+    }
   }
 
   private processState(jsonState: string): void {
@@ -116,7 +142,7 @@ export class GameController {
       var gameState = JSON.parse(jsonState);
 
       this._alertStore.hideAlert(); // Hide any existing alerts
-      
+
       [this._tableInfo, changed] = TableInfo.update(this._tableInfo, gameState);
       if (changed) console.info("TableInfo changed:", this._tableInfo);
 
@@ -152,7 +178,7 @@ export class GameController {
     this._hubConnector.registerEventHandler("OnError", (errorCode: number, hubMethodID: Cards56HubMethod, errorMessage: string, errorData: any) => {
       // Log details to console for developers
       console.error(`${Cards56HubMethod[hubMethodID] || "Unknown"} Error [${errorCode}]: ${errorMessage}`, errorData);
-      
+
       // Show the error using AlertStore for users
       this._alertStore.showError(errorMessage);
     });
@@ -167,11 +193,11 @@ export class GameController {
       // Store player ID in memory for this session only
       this._playerId = player.playerID;
       console.info("Player registered with ID:", player.playerID);
-      
+
       // Automatically join table after registration completes
       if (!player.tableName) {
         // Join table
-        this._hubConnector.invokeMethod("JoinTable", parseInt(loginParams.tableType), loginParams.tableName)
+        this._hubConnector.invokeMethod("JoinTable", parseInt(this._loginParams.tableType), this._loginParams.tableName)
           .catch(error => {
             console.error("Error invoking JoinTable:", error);
           });
@@ -181,7 +207,7 @@ export class GameController {
       }
     });
   }
-  
+
   // Public connection and disconnection methods
   public async connect(): Promise<void> {
     return this._hubConnector.connect();
@@ -200,14 +226,14 @@ export class GameController {
         console.info("Cannot register player. Hub connection state:", this._hubConnector.connectionState);
         return; // Exit without trying to register
       }
-      
+
       // Use parameters from loginParams to register player
       await this._hubConnector.invokeMethod(
         "RegisterPlayer",
         this._playerId || "",
-        loginParams.userName,
-        loginParams.language,
-        loginParams.watch
+        this._loginParams.userName,
+        this._loginParams.language,
+        this._loginParams.watch
       );
       // Note: No need to handle registration completion here, it's handled by the event handler
     } catch (error) {

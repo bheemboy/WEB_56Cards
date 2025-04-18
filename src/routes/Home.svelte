@@ -9,17 +9,28 @@
   const gameController: GameController = getContext(gameControllerContextKey);
   const localLoginParams = $state(gameController.loginParams.clone());
 
-  function playGame(watch = false) {
+  async function playGame(watch = false) {
     if (!localLoginParams.userName) {
       alert("Please enter your name before joining the game");
       return;
     }
+
     localLoginParams.watch = watch;
-    gameController.updateLoginParams(localLoginParams);
-    const queryString = new URLSearchParams(
-      Object.fromEntries(Object.entries(gameController.loginParams)),
-    ).toString();
-    navigate(`/table?${queryString}`);
+
+    try {
+      // Wait for updateLoginParams to complete before navigation
+      await gameController.updateLoginParams(localLoginParams);
+
+      // Now that parameters are updated, navigate to the table page
+      const queryString = new URLSearchParams(
+        Object.fromEntries(Object.entries(gameController.loginParams)),
+      ).toString();
+
+      navigate(`/table?${queryString}`);
+    } catch (error) {
+      console.error("Error updating login parameters:", error);
+      alert("Failed to prepare game session. Please try again.");
+    }
   }
 </script>
 

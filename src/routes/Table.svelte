@@ -1,19 +1,20 @@
 <!-- Table.svelte -->
 <script lang="ts">
   import { onMount, getContext } from "svelte";
-  import { loginParams } from "../lib/LoginParams.svelte";
-  import { GameController, gameControllerContextKey } from '../lib/GameController.svelte';
-  import { ConnectionState } from '../lib/HubConnection.svelte'
-
+  import {
+    GameController,
+    gameControllerContextKey,
+  } from "../lib/GameController.svelte";
+  import { ConnectionState } from "../lib/HubConnection.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
   import TeamScores from "../lib/TeamScores.svelte";
   import Chair from "../lib/Chair.svelte";
 
   // Get the hub instance from the context
-  const hub: GameController = getContext(gameControllerContextKey);
+  const gameController: GameController = getContext(gameControllerContextKey);
 
-  onMount(() => {
+  onMount(async () => {
     // Parse URL parameters
     const rawParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(
@@ -27,47 +28,66 @@
     );
 
     // Update loginParams
-    loginParams.userName = params.username ?? loginParams.userName;
-    loginParams.tableType = params.tabletype ?? loginParams.tableType;
-    loginParams.tableName = params.tablename ?? loginParams.tableName;
-    loginParams.language = params.lang ?? loginParams.language;
-    loginParams.watch = params.watch === "true" ? true : loginParams.watch;
+    // This will disconnect if paramters have changed
+    await gameController.updateLoginParams({
+      userName: params.username ?? gameController.loginParams.userName,
+      tableType: params.tabletype ?? gameController.loginParams.tableType,
+      tableName: params.tablename ?? gameController.loginParams.tableName,
+      language: params.lang ?? gameController.loginParams.language,
+      watch: params.watch === "true" ? true : gameController.loginParams.watch,
+    });
+
+    if (gameController.connectionState !== ConnectionState.CONNECTED) {
+      await gameController.connect();
+    }
   });
-  
+
   // Use $effect to register player when connection state changes to CONNECTED
   $effect(() => {
-    if (hub.connectionState === ConnectionState.CONNECTED) {
-      hub.registerPlayer().catch((err) => {
+    if (gameController.connectionState === ConnectionState.CONNECTED) {
+      console.log("Connection established, now registering player...");
+      gameController.registerPlayer().catch((err) => {
         console.error("Registration failed:", err);
       });
     }
   });
-  
+
   // Calculate total number of chairs using $derived
-  const totalChairs = $derived(hub.chairs?.getAllChairs().length ?? 8);
+  const totalChairs = $derived(
+    gameController.chairs?.getAllChairs().length ?? 8,
+  );
 </script>
 
 <div class="table-container">
-  {#if hub.currentPlayer.homeTeam >= 0}
-    {#each hub.gameInfo.teams as { currentScore, scoreNeeded, coolieCount }, index}
-      <Coolies team={index} homeTeam={hub.currentPlayer.homeTeam} {coolieCount} />
-      {#if hub.gameInfo.gameStage >= 4 && !hub.gameInfo.gameCancelled && !hub.gameInfo.gameForfeited}
-        <TeamScores team={index} homeTeam={hub.currentPlayer.homeTeam} {currentScore} winningScore={scoreNeeded} />
+  {#if gameController.currentPlayer.homeTeam >= 0}
+    {#each gameController.gameInfo.teams as { currentScore, scoreNeeded, coolieCount }, index}
+      <Coolies
+        team={index}
+        homeTeam={gameController.currentPlayer.homeTeam}
+        {coolieCount}
+      />
+      {#if gameController.gameInfo.gameStage >= 4 && !gameController.gameInfo.gameCancelled && !gameController.gameInfo.gameForfeited}
+        <TeamScores
+          team={index}
+          homeTeam={gameController.currentPlayer.homeTeam}
+          {currentScore}
+          winningScore={scoreNeeded}
+        />
       {/if}
     {/each}
   {/if}
 
-  {#each hub.chairs.getAllChairs() as chair}
-    {#if chair.Position !== hub.currentPlayer.playerPosition}
-      <Chair 
-        {chair} 
-        currentPlayerPosition={hub.currentPlayer.playerPosition}
+  {#each gameController.chairs.getAllChairs() as chair}
+    {#if chair.Position !== gameController.currentPlayer.playerPosition}
+      <Chair
+        {chair}
+        currentPlayerPosition={gameController.currentPlayer.playerPosition}
         {totalChairs}
       />
     {/if}
   {/each}
 
-  <CardsDeck cards={hub.currentPlayer.playerCards} />
+  <CardsDeck cards={gameController.currentPlayer.playerCards} />
 </div>
 
 <style>
