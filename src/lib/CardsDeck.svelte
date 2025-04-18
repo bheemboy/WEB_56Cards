@@ -2,7 +2,7 @@
     import SvgCard, {type SvgCardProps} from "./SvgCard.svelte";
 
     export interface CardsDeckProps { 
-        cards: string[]
+        cards: readonly string[]
         vh?: number 
         percardrotation?: number 
         percardtranslation?: number 

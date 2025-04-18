@@ -67,12 +67,12 @@ export class Cards56Hub {
   private _hubConnection: signalR.HubConnection;
   private _connectionState = $state(ConnectionState.DISCONNECTED);
   private _playerId: string | null = null;
-  private _tableInfo: TableInfo = $state<TableInfo>(new TableInfo());
-  private _currentPlayer: CurrentPlayer = $state<CurrentPlayer>(new CurrentPlayer());
+  private _tableInfo: TableInfo = $state<TableInfo>(TableInfo.create());
+  private _currentPlayer: CurrentPlayer = $state<CurrentPlayer>(CurrentPlayer.create());
   private _gameInfo: GameInfo = $state<GameInfo>(GameInfo.create());
-  private _chairs: Chairs = $state<Chairs>(new Chairs());
-  private _bidInfo: BidInfo = $state<BidInfo>(new BidInfo());
-  private _roundsInfo: RoundsInfo = $state<RoundsInfo>(new RoundsInfo());
+  private _chairs: Chairs = $state<Chairs>(Chairs.create());
+  private _bidInfo: BidInfo = $state<BidInfo>(BidInfo.create());
+  private _roundsInfo: RoundsInfo = $state<RoundsInfo>(RoundsInfo.create());
 
   // Get access to alert store for error handling
   private _alertStore = alertStoreInstance;
