@@ -1,11 +1,10 @@
 <script lang="ts">
   import { navigate } from "svelte-routing";
-  import { onMount, getContext } from "svelte";
+  import { getContext } from "svelte";
   import {
     GameController,
     gameControllerContextKey,
   } from "../lib/GameController.svelte";
-  import { type LoginParamsData } from "../lib/LoginParams.svelte";
 
   const gameController: GameController = getContext(gameControllerContextKey);
   const localLoginParams = $state(gameController.loginParams.clone());
@@ -15,6 +14,7 @@
       alert("Please enter your name before joining the game");
       return;
     }
+    localLoginParams.watch = watch;
     gameController.updateLoginParams(localLoginParams);
     const queryString = new URLSearchParams(
       Object.fromEntries(Object.entries(gameController.loginParams)),
