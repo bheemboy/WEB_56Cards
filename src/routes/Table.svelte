@@ -2,18 +2,16 @@
 <script lang="ts">
   import { onMount, getContext } from "svelte";
   import { loginParams } from "../lib/LoginParams.svelte";
-  import {
-    type Cards56Hub,
-    ConnectionState,
-    cards56HubContextKey,
-  } from "../lib/Cards56Hub.svelte";
+  import { GameController, gameControllerContextKey } from '../lib/GameController.svelte';
+  import { ConnectionState } from '../lib/HubConnection.svelte'
+
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
   import TeamScores from "../lib/TeamScores.svelte";
   import Chair from "../lib/Chair.svelte";
 
   // Get the hub instance from the context
-  const hub: Cards56Hub = getContext(cards56HubContextKey);
+  const hub: GameController = getContext(gameControllerContextKey);
 
   onMount(() => {
     // Parse URL parameters

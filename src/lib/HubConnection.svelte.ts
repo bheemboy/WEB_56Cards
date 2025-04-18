@@ -1,7 +1,15 @@
 import * as signalR from "@microsoft/signalr";
-import { ConnectionState } from "./GameControllerTypes";
 import { CustomRetryPolicy } from "./RetryPolicy";
 import { alertStoreInstance } from "./AlertStore.svelte";
+
+// Define connection states
+export const ConnectionState = {
+  DISCONNECTED: "disconnected",
+  CONNECTING: "connecting", 
+  CONNECTED: "connected",
+  RECONNECTING: "reconnecting",
+  FAILED: "failed"
+};
 
 export class HubConnector {
   private _hubConnection: signalR.HubConnection;

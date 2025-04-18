@@ -1,5 +1,4 @@
-import { ConnectionState, cards56HubContextKey, Cards56HubMethod, type Player } from "./GameControllerTypes";
-import { HubConnector } from "./HubConnection.svelte";
+import { ConnectionState, HubConnector } from "./HubConnection.svelte";
 import { loginParams } from "./LoginParams.svelte";
 import { alertStoreInstance } from "./AlertStore.svelte";
 import { TableInfo } from "./states/TableInfo.svelte";
@@ -8,6 +7,37 @@ import { GameInfo } from "./states/GameInfo.svelte";
 import { Chairs } from "./states/Chairs.svelte";
 import { BidInfo } from "./states/BidInfo.svelte";
 import { RoundsInfo } from "./states/Rounds.svelte";
+
+// Define hub methods
+export enum Cards56HubMethod {
+  RegisterPlayer = 1,
+  JoinTable = 2,
+  PlaceBid = 3,
+  PassBid = 4,
+  SelectTrump = 5,
+  PlayCard = 6,
+  ShowTrump = 7,
+  StartNextGame = 8,
+  RefreshState = 9,
+  ForfeitGame = 10,
+}
+
+// Player interface
+export interface Player {
+  playerID: string;
+  name: string;
+  lang: string;
+  tableName: string;
+  watchOnly: boolean;
+}
+
+// Error information interface
+export interface ErrorInfo {
+  errorCode: number;
+  hubMethodID: Cards56HubMethod;
+  errorMessage: string;
+  errorData: any;
+}
 
 export class GameController {
   private _hubConnector: HubConnector;
@@ -219,6 +249,9 @@ export class GameController {
     return this._hubConnector.invokeMethod("ForfeitGame");
   }
 }
+
+// Define a unique key for the context
+export const gameControllerContextKey = Symbol("gameControllerContext");
 
 // Create and export the singleton instance
 export const gameControllerInstance: GameController = GameController.getInstance();
