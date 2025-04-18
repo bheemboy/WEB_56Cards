@@ -33,13 +33,12 @@
     loginParams.language = params.lang ?? loginParams.language;
     loginParams.watch = params.watch === "true" ? true : loginParams.watch;
   });
-
-  // Use effect to handle player registration when connection state changes
-
+  
+  // Use $effect to register player when connection state changes to CONNECTED
   $effect(() => {
     if (hub.connectionState === ConnectionState.CONNECTED) {
-      hub.registerPlayer().catch(() => {
-        // Errors are now handled by the hub itself with alerts
+      hub.registerPlayer().catch((err) => {
+        console.error("Registration failed:", err);
       });
     }
   });

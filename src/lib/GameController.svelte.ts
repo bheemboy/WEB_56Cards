@@ -48,7 +48,6 @@ export class GameController {
   private _chairs: Chairs = $state<Chairs>(Chairs.create());
   private _bidInfo: BidInfo = $state<BidInfo>(BidInfo.create());
   private _roundsInfo: RoundsInfo = $state<RoundsInfo>(RoundsInfo.create());
-
   // Get access to alert store for error handling
   private _alertStore = alertStoreInstance;
 
