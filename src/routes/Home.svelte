@@ -20,9 +20,17 @@
       // Wait for updateLoginParams to complete before navigation
       await gameController.updateLoginParams(localLoginParams);
 
-      // Now that parameters are updated, navigate to the table page
+      // Now that parameters are updated, construct URL using 0/1 for watch
+      const params = {
+        userName: gameController.loginParams.userName,
+        tableType: gameController.loginParams.tableType,
+        tableName: gameController.loginParams.tableName,
+        language: gameController.loginParams.language,
+        watch: gameController.loginParams.watch ? 1 : 0
+      };
+      
       const queryString = new URLSearchParams(
-        Object.fromEntries(Object.entries(gameController.loginParams)),
+        Object.entries(params).map(([key, value]) => [key, String(value)])
       ).toString();
 
       // Use history.pushState for client-side navigation

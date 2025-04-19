@@ -116,7 +116,7 @@ export class GameController {
   }
 
   // Method to update login params - SIMPLIFIED
-  public async updateLoginParams(newData: Partial<LoginParamsData>): Promise<void> {
+  public async updateLoginParams(newData: Partial<LoginParamsData>): Promise<[LoginParams, boolean]> {
     const [updatedParams, changed] = LoginParams.update(this._loginParams, newData);
     if (changed) {
       this._loginParams = updatedParams;
@@ -138,6 +138,7 @@ export class GameController {
         this._playerId = null;
       }
     }
+    return [updatedParams, changed];
   }
 
   private processState(jsonState: string): void {

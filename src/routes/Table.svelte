@@ -1,6 +1,6 @@
 <!-- Table.svelte -->
 <script lang="ts">
-  import { getContext } from "svelte";
+  import { getContext, onMount } from "svelte";
   import {
     GameController,
     gameControllerContextKey,
@@ -14,9 +14,57 @@
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
   let connectionAttempted = $state(false);
+  let initializing = $state(true);
+
+  // Add debug logging
+  $effect(() => {
+    console.log('Debug state:', {
+      homeTeam: gameController.currentPlayer.homeTeam,
+      playerPosition: gameController.currentPlayer.playerPosition,
+      connectionState: gameController.connectionState,
+      chairs: gameController.chairs.getAllChairs(),
+      cards: gameController.currentPlayer.playerCards,
+      loginParams: gameController.loginParams,
+      initializing
+    });
+  });
+
+  // Initialize connection when component mounts
+  onMount(async () => {
+    // Get current URL params right away
+    const url = new URL(window.location.href);
+    const rawParams = new URLSearchParams(url.search);
+    const params = Object.fromEntries(
+      Array.from(rawParams.entries()).map(([key, value]) => [
+        key.toLowerCase(),
+        value
+      ]),
+    );
+
+    console.log('Initial URL Parameters:', params);
+    
+    try {
+      // First update login params
+      await handleParamsUpdate(params);
+      
+      // Then ensure we're connected
+      if (gameController.connectionState !== ConnectionState.CONNECTED &&
+          gameController.connectionState !== ConnectionState.CONNECTING) {
+        console.log('Establishing initial connection...');
+        await gameController.connect();
+      }
+    } catch (err) {
+      console.error("Error during initialization:", err);
+    } finally {
+      initializing = false;
+    }
+  });
 
   // Create an effect that watches URL changes
   $effect(() => {
+    // Don't handle URL changes during initialization
+    if (initializing) return;
+
     // Get current URL params
     const url = new URL(window.location.href);
     const rawParams = new URLSearchParams(url.search);
@@ -27,35 +75,45 @@
       ]),
     );
 
-    // Update loginParams and handle connection
+    console.log('URL Parameters changed:', params);
     handleParamsUpdate(params);
   });
 
   async function handleParamsUpdate(params: Record<string, string>) {
     try {
-      // Update loginParams with type conversion for tableType
-      await gameController.updateLoginParams({
+      console.log('Updating params:', params); // Add logging to debug
+      
+      // Update login params and check if anything changed
+      const [, paramsChanged] = await gameController.updateLoginParams({
         userName: params.username ?? gameController.loginParams.userName,
         tableType: params.tabletype ?? gameController.loginParams.tableType,
         tableName: params.tablename ?? gameController.loginParams.tableName,
-        language: params.lang ?? gameController.loginParams.language,
-        watch: params.watch === "true",
+        language: params.language ?? gameController.loginParams.language,
+        // Parse watch as number and convert to boolean
+        watch: params.watch === "1"
       });
 
       // Mark connection as attempted
       connectionAttempted = true;
 
-      // Disconnect if already connected to force a new connection with new parameters
-      if (gameController.connectionState === ConnectionState.CONNECTED) {
-        await gameController.disconnect();
-      }
+      // Force reconnection if any parameter changed
+      if (paramsChanged) {
+        console.log('Parameters changed, forcing reconnection'); // Add logging
 
-      // Only attempt to connect if needed
-      if (
-        gameController.connectionState !== ConnectionState.CONNECTED &&
-        gameController.connectionState !== ConnectionState.CONNECTING
-      ) {
-        await gameController.connect();
+        // Disconnect if already connected
+        if (gameController.connectionState === ConnectionState.CONNECTED) {
+          await gameController.disconnect();
+          // Add a small delay to ensure disconnect completes
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Only attempt to connect if needed
+        if (
+          gameController.connectionState !== ConnectionState.CONNECTED &&
+          gameController.connectionState !== ConnectionState.CONNECTING
+        ) {
+          await gameController.connect();
+        }
       }
     } catch (err) {
       console.error("Error handling parameter update:", err);
