@@ -17,10 +17,8 @@
     localLoginParams.watch = watch;
 
     try {
-      // Wait for updateLoginParams to complete before navigation
       await gameController.updateLoginParams(localLoginParams);
 
-      // Now that parameters are updated, construct URL using 0/1 for watch
       const params = {
         userName: gameController.loginParams.userName,
         tableType: gameController.loginParams.tableType,
@@ -33,9 +31,7 @@
         Object.entries(params).map(([key, value]) => [key, String(value)])
       ).toString();
 
-      // Use history.pushState for client-side navigation
       window.history.pushState({}, '', `/table?${queryString}`);
-      // Dispatch a popstate event to trigger route update
       window.dispatchEvent(new PopStateEvent('popstate'));
     } catch (error) {
       console.error("Error updating login parameters:", error);

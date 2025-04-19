@@ -16,19 +16,6 @@
   let connectionAttempted = $state(false);
   let initializing = $state(true);
 
-  // Add debug logging
-  $effect(() => {
-    console.log('Debug state:', {
-      homeTeam: gameController.currentPlayer.homeTeam,
-      playerPosition: gameController.currentPlayer.playerPosition,
-      connectionState: gameController.connectionState,
-      chairs: gameController.chairs.getAllChairs(),
-      cards: gameController.currentPlayer.playerCards,
-      loginParams: gameController.loginParams,
-      initializing
-    });
-  });
-
   // Initialize connection when component mounts
   onMount(async () => {
     // Get current URL params right away
@@ -40,8 +27,6 @@
         value
       ]),
     );
-
-    console.log('Initial URL Parameters:', params);
     
     try {
       // First update login params
@@ -50,7 +35,6 @@
       // Then ensure we're connected
       if (gameController.connectionState !== ConnectionState.CONNECTED &&
           gameController.connectionState !== ConnectionState.CONNECTING) {
-        console.log('Establishing initial connection...');
         await gameController.connect();
       }
     } catch (err) {
@@ -75,21 +59,17 @@
       ]),
     );
 
-    console.log('URL Parameters changed:', params);
     handleParamsUpdate(params);
   });
 
   async function handleParamsUpdate(params: Record<string, string>) {
     try {
-      console.log('Updating params:', params); // Add logging to debug
-      
       // Update login params and check if anything changed
       const [, paramsChanged] = await gameController.updateLoginParams({
         userName: params.username ?? gameController.loginParams.userName,
         tableType: params.tabletype ?? gameController.loginParams.tableType,
         tableName: params.tablename ?? gameController.loginParams.tableName,
         language: params.language ?? gameController.loginParams.language,
-        // Parse watch as number and convert to boolean
         watch: params.watch === "1"
       });
 
@@ -98,8 +78,6 @@
 
       // Force reconnection if any parameter changed
       if (paramsChanged) {
-        console.log('Parameters changed, forcing reconnection'); // Add logging
-
         // Disconnect if already connected
         if (gameController.connectionState === ConnectionState.CONNECTED) {
           await gameController.disconnect();
@@ -125,14 +103,9 @@
     const connectionState = gameController.connectionState;
 
     if (connectionState === ConnectionState.CONNECTED && connectionAttempted) {
-      console.log("Connection established, now registering player...");
       gameController.registerPlayer().catch((err) => {
         console.error("Registration failed:", err);
       });
-    } else if (connectionState === ConnectionState.DISCONNECTING) {
-      console.log("Connection is closing, will register when reconnected...");
-    } else if (connectionState === ConnectionState.CONNECTING) {
-      console.log("Connection is being established...");
     }
   });
 
