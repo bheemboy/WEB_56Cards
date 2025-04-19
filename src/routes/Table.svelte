@@ -13,6 +13,7 @@
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
+  let connectionAttempted = $state(false);
 
   onMount(async () => {
     // Parse URL parameters
@@ -28,7 +29,7 @@
     );
 
     // Update loginParams
-    // This will disconnect if paramters have changed
+    // This will disconnect if parameters have changed
     await gameController.updateLoginParams({
       userName: params.username ?? gameController.loginParams.userName,
       tableType: params.tabletype ?? gameController.loginParams.tableType,
@@ -37,18 +38,35 @@
       watch: params.watch === "true" ? true : gameController.loginParams.watch,
     });
 
-    if (gameController.connectionState !== ConnectionState.CONNECTED) {
-      await gameController.connect();
+    // Mark connection as attempted even if we don't actually connect here
+    connectionAttempted = true;
+
+    // Only attempt to connect if needed
+    if (
+      gameController.connectionState !== ConnectionState.CONNECTED &&
+      gameController.connectionState !== ConnectionState.CONNECTING
+    ) {
+      try {
+        await gameController.connect();
+      } catch (err) {
+        console.error("Error connecting:", err);
+      }
     }
   });
 
   // Use $effect to register player when connection state changes to CONNECTED
   $effect(() => {
-    if (gameController.connectionState === ConnectionState.CONNECTED) {
+    const connectionState = gameController.connectionState;
+
+    if (connectionState === ConnectionState.CONNECTED && connectionAttempted) {
       console.log("Connection established, now registering player...");
       gameController.registerPlayer().catch((err) => {
         console.error("Registration failed:", err);
       });
+    } else if (connectionState === ConnectionState.DISCONNECTING) {
+      console.log("Connection is closing, will register when reconnected...");
+    } else if (connectionState === ConnectionState.CONNECTING) {
+      console.log("Connection is being established...");
     }
   });
 
