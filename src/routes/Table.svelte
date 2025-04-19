@@ -1,6 +1,6 @@
 <!-- Table.svelte -->
 <script lang="ts">
-  import { onMount, getContext } from "svelte";
+  import { getContext } from "svelte";
   import {
     GameController,
     gameControllerContextKey,
@@ -15,44 +15,52 @@
   const gameController: GameController = getContext(gameControllerContextKey);
   let connectionAttempted = $state(false);
 
-  onMount(async () => {
-    // Parse URL parameters
-    const rawParams = new URLSearchParams(window.location.search);
+  // Create an effect that watches URL changes
+  $effect(() => {
+    // Get current URL params
+    const url = new URL(window.location.href);
+    const rawParams = new URLSearchParams(url.search);
     const params = Object.fromEntries(
       Array.from(rawParams.entries()).map(([key, value]) => [
         key.toLowerCase(),
-        // Convert lang and watch parameter values to lowercase
-        key.toLowerCase() === "lang" || key.toLowerCase() === "watch"
-          ? value.toLowerCase()
-          : value,
+        value
       ]),
     );
 
-    // Update loginParams
-    // This will disconnect if parameters have changed
-    await gameController.updateLoginParams({
-      userName: params.username ?? gameController.loginParams.userName,
-      tableType: params.tabletype ?? gameController.loginParams.tableType,
-      tableName: params.tablename ?? gameController.loginParams.tableName,
-      language: params.lang ?? gameController.loginParams.language,
-      watch: params.watch === "true" ? true : gameController.loginParams.watch,
-    });
-
-    // Mark connection as attempted even if we don't actually connect here
-    connectionAttempted = true;
-
-    // Only attempt to connect if needed
-    if (
-      gameController.connectionState !== ConnectionState.CONNECTED &&
-      gameController.connectionState !== ConnectionState.CONNECTING
-    ) {
-      try {
-        await gameController.connect();
-      } catch (err) {
-        console.error("Error connecting:", err);
-      }
-    }
+    // Update loginParams and handle connection
+    handleParamsUpdate(params);
   });
+
+  async function handleParamsUpdate(params: Record<string, string>) {
+    try {
+      // Update loginParams with type conversion for tableType
+      await gameController.updateLoginParams({
+        userName: params.username ?? gameController.loginParams.userName,
+        tableType: params.tabletype ?? gameController.loginParams.tableType,
+        tableName: params.tablename ?? gameController.loginParams.tableName,
+        language: params.lang ?? gameController.loginParams.language,
+        watch: params.watch === "true",
+      });
+
+      // Mark connection as attempted
+      connectionAttempted = true;
+
+      // Disconnect if already connected to force a new connection with new parameters
+      if (gameController.connectionState === ConnectionState.CONNECTED) {
+        await gameController.disconnect();
+      }
+
+      // Only attempt to connect if needed
+      if (
+        gameController.connectionState !== ConnectionState.CONNECTED &&
+        gameController.connectionState !== ConnectionState.CONNECTING
+      ) {
+        await gameController.connect();
+      }
+    } catch (err) {
+      console.error("Error handling parameter update:", err);
+    }
+  }
 
   // Use $effect to register player when connection state changes to CONNECTED
   $effect(() => {
@@ -70,10 +78,11 @@
     }
   });
 
-  // Calculate total number of chairs using $derived
-  const totalChairs = $derived(
-    gameController.chairs?.getAllChairs().length ?? 8,
-  );
+  // Calculate total number of chairs based on tableType
+  const chairCount = $derived(() => {
+    const tableTypeMap = { "0": 4, "1": 6, "2": 8 };
+    return tableTypeMap[gameController.loginParams.tableType as keyof typeof tableTypeMap] || 4;
+  });
 </script>
 
 <div class="table-container">
@@ -100,7 +109,7 @@
       <Chair
         {chair}
         currentPlayerPosition={gameController.currentPlayer.playerPosition}
-        {totalChairs}
+        totalChairs={chairCount()}
       />
     {/if}
   {/each}

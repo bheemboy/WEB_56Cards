@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { navigate } from "svelte-routing";
   import { getContext } from "svelte";
   import {
     GameController,
@@ -26,7 +25,10 @@
         Object.fromEntries(Object.entries(gameController.loginParams)),
       ).toString();
 
-      navigate(`/table?${queryString}`);
+      // Use history.pushState for client-side navigation
+      window.history.pushState({}, '', `/table?${queryString}`);
+      // Dispatch a popstate event to trigger route update
+      window.dispatchEvent(new PopStateEvent('popstate'));
     } catch (error) {
       console.error("Error updating login parameters:", error);
       alert("Failed to prepare game session. Please try again.");
