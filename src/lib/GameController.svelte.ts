@@ -1,3 +1,4 @@
+import * as signalR from "@microsoft/signalr";
 import { ConnectionState, HubConnector } from "./HubConnection.svelte";
 import { type LoginParamsData, LoginParams } from "./LoginParams.svelte";
 import { alertStoreInstance } from "./AlertStore.svelte";
@@ -125,6 +126,10 @@ export class GameController {
       if (this._playerId) {
         try {
           await this._hubConnector.disconnect();
+
+          // Wait for connection state to fully update
+          // This prevents the effect in Table.svelte from firing too early
+          await new Promise(resolve => setTimeout(resolve, 50));
         } catch (err) {
           console.error("Error during disconnect:", err);
         }
@@ -221,12 +226,15 @@ export class GameController {
   public async registerPlayer(): Promise<void> {
     try {
       // Check connection state first
-      if (this._hubConnector.connectionState !== ConnectionState.CONNECTED) {
+      if (this._hubConnector.connectionState !== ConnectionState.CONNECTED || 
+          this._hubConnector.hubConnection.state as string !== signalR.HubConnectionState[signalR.HubConnectionState.Connected]) {
         this._alertStore.showWarning(`Cannot register player: Not connected`, "Registration Failed");
-        console.info("Cannot register player. Hub connection state:", this._hubConnector.connectionState);
+        console.info("Cannot register player. Hub connection states:", 
+                   {reactive: this._hubConnector.connectionState, 
+                    actual: this._hubConnector.hubConnection.state});
         return; // Exit without trying to register
       }
-
+  
       // Use parameters from loginParams to register player
       await this._hubConnector.invokeMethod(
         "RegisterPlayer",
@@ -241,7 +249,7 @@ export class GameController {
       throw error;
     }
   }
-
+  
   public async placeBid(bid: number): Promise<void> {
     return this._hubConnector.invokeMethod("PlaceBid", bid);
   }
