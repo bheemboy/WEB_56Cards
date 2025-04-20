@@ -1,48 +1,79 @@
 <script lang="ts">
-    import SvgCard, {type SvgCardProps} from "./SvgCard.svelte";
+  import Card, { type SvgCardProps } from "./Card.svelte";
+  import { getCardHeight_Fractional } from './CardHeight';
+  
+  export interface CardsDeckProps {
+    cards: readonly string[];
+    percardrotation?: number;
+    percardtranslation?: number;
+  }
 
-    export interface CardsDeckProps { 
-        cards: readonly string[]
-        vh?: number 
-        percardrotation?: number 
-        percardtranslation?: number 
-    }
+  let {
+    cards,
+    percardrotation = 10,
+    percardtranslation = 15,
+  }: CardsDeckProps = $props();
 
-    let { cards, vh = 15, percardrotation = 13, percardtranslation = 1.8} : CardsDeckProps = $props();
+  let deckHeight = $state(0);
+  let deckWidth = $state(0);
 
-    // The array of card data to use in the markup
-    let cardsData: SvgCardProps[] = $state([]);
+  let height = $derived(getCardHeight_Fractional(
+    percardrotation * 4,
+    percardtranslation * 4 / 100,
+    deckWidth / 2,
+    -1 * deckHeight));
 
-    // Recalc each card's properties based on its array index.
-    $effect(() => {
-        cardsData = cards.map((c: string, i: number): SvgCardProps => ({
-            card: c,
-            vh: vh,
-            rotation: percardrotation * (i - (cards.length - 1) / 2),
-            translation: percardtranslation * (i - (cards.length - 1) / 2),
-            oncardplayed: () => {
-                // Remove the card from the deck
-                // cards = [...cards.slice(0, i), ...cards.slice(i + 1)];
-                console.log(`try to play card at index ${i}, remaining cards ${cards}`);
-            }
-        }));
-    });
+  // The array of card data to use in the markup
+  let cardsData: SvgCardProps[] = $state([]);
+
+  // Recalc each card's properties based on its array index.
+  $effect(() => {
+    // console.log("height", height, "deckHeight", deckHeight, "deckWidth/2", deckWidth/2);
+    cardsData = cards.map(
+      (card: string, index: number): SvgCardProps => ({
+        card,
+        index,
+        height,
+        rotation: percardrotation * (index - (cards.length - 1) / 2),
+        translation: percardtranslation * (index - (cards.length - 1) / 2),
+        oncardplayed: () => {
+          console.log(
+            `try to play card at index ${index}, remaining cards ${cards}`,
+          );
+        },
+      }),
+    );
+  });
+
+
 </script>
 
-<div class="deck"
-  style:height = "{vh*1.5}vh"
-  style:aspect-ratio = {2}>
-    {#each cardsData as cardData, index (cardData.card + '-' + index)}
-        <SvgCard {...cardData} />
+<div class="deck-container">
+  <div class="deck" bind:clientHeight={deckHeight} bind:clientWidth={deckWidth}>
+    {#each cardsData as cardData, index (cardData.card + "-" + index)}
+      <Card {...cardData} />
     {/each}
+  </div>
 </div>
 
 <style>
-    .deck {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* border: 1px solid rgba(255, 255, 255, 0.2); */
-    }
+  .deck-container {
+    container-type: size;
+    width: 100cqh;
+    height: 25cqh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    /* border: 2px solid yellow; */
+  }
+
+  .deck {
+    position: relative;
+    width: 100cqw;
+    height: 100cqh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border: 2px solid black; */
+  }
 </style>
