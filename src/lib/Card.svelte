@@ -1,21 +1,19 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    const CARDHEIGHT = 190;
-    const CARDWIDTH = 140;
-    const ASPECTRATIO = CARDWIDTH / CARDHEIGHT; 
+    import { onMount, onDestroy } from 'svelte';
+    const ASPECTRATIO = 140 / 190; // width/height ratio for cards
     
     export interface SvgCardProps {
         card: string
-        vh: number
+        height: number
         rotation: number
         translation: number
         oncardplayed: () => void
+        index: number
     }
 
-    const {card, vh, rotation, translation, oncardplayed}: SvgCardProps = $props();
+    const {card, height, rotation, translation, oncardplayed, index = 0}: SvgCardProps = $props();
 
     let imageError = $state(false);
-    
     async function checkImageExists(card: string): Promise<boolean> {
         try {
             const response = await fetch(`/images/svgcards/${card}.svg`, { method: 'HEAD' });
@@ -30,8 +28,8 @@
         console.error(`Failed to load card image: ${card}`);
     }
 
-    // Check image on mount
     onMount(async () => {
+        // Check image
         if (!(await checkImageExists(card))) {
             handleImageError();
         }
@@ -42,19 +40,17 @@
   <div class="error">Invalid card: {card}</div>
 {:else}
   <div 
-      class="card {imageError ? 'invalid-card' : ''}"
+      class="card"
       role="button"
       tabindex="0"
       onclick={oncardplayed}
       onkeydown={() => {}}
       aria-label={`${card} playing card`}
-      style:height = "{vh}vh"
-      style:aspect-ratio = {ASPECTRATIO}
+      style:--rotation = "{rotation}deg"
+      style:--translation = "{translation}%"
+      style:--card-aspect-ratio = "{ASPECTRATIO}"
+      style:height = "{height}px"
       style:background-image = 'url("/images/svgcards/{card}.svg")'
-      style:transform-origin = "30% 100%"
-      style:transform = "rotate({rotation}deg)"
-      style:translate = "{translation}vh 0"
-      style:transition = "top 0.1s ease-out"
       onerror={handleImageError}>
   </div>
 {/if}
@@ -62,23 +58,25 @@
 <style>
     .card {
       position: absolute;
-      border: none;
-      outline: none;
-      padding: 0;
-      top: 9%;
+      width: auto;
+      top: 0%;
+      aspect-ratio: var(--card-aspect-ratio);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transform-origin: center bottom;
+      transform: rotate(var(--rotation)) translateX(var(--translation));
+      transition: transform 0.2s ease-out, height 0.2s ease-out;
+      cursor: pointer;
     }
+
     .card:hover {
-        top: 6%;
+        transform: rotate(var(--rotation)) translateX(var(--translation)) translateY(-1em);
     }
 
     .error {
         color: red;
         font-weight: bold;
         font-size: 12px;
-    }
-
-    .invalid-card {
-        background-color: #ffeeee;
-        border: 1px solid red;
     }
 </style>

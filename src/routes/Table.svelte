@@ -161,7 +161,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    container-type: inline-size;
+    container-type: size;
     width: 100vw;
     height: 100vh;
     position: fixed;
@@ -170,6 +170,7 @@
   }
 
   .table {
+    container-type: size;
     width: 100%;
     height: 100%;
     background-image: url("/images/table-background.jpg");
