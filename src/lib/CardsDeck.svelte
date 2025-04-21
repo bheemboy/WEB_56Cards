@@ -10,8 +10,8 @@
 
   let {
     cards,
-    percardrotation = 10,
-    percardtranslation = 15,
+    percardrotation = 13,
+    percardtranslation = 14,
   }: CardsDeckProps = $props();
 
   let deckHeight = $state(0);
@@ -34,7 +34,7 @@
         card,
         index,
         height,
-        rotation: percardrotation * (index - (cards.length - 1) / 2),
+        rotation: (cards.length == 1 ? 0 : percardrotation * (index - (cards.length - 1.5) / 2)),
         translation: percardtranslation * (index - (cards.length - 1) / 2),
         oncardplayed: () => {
           console.log(

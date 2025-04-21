@@ -60,6 +60,8 @@
       position: absolute;
       width: auto;
       top: 0%;
+      box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
+      border-radius: 2cqw;
       aspect-ratio: var(--card-aspect-ratio);
       background-size: contain;
       background-repeat: no-repeat;
