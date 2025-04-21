@@ -1,50 +1,68 @@
 <script lang="ts">
   import Card, { type SvgCardProps } from "./Card.svelte";
-  import { getCardHeight_Fractional } from './CardHeight';
-  
+  import { ASPECT_RATIO, getCardHeight_Fractional } from "./CardHeight";
+
   export interface CardsDeckProps {
     cards: readonly string[];
-    percardrotation?: number;
-    percardtranslation?: number;
+    showfullcard?: boolean;
+    maxcards?: number;
   }
 
   let {
     cards,
-    percardrotation = 13,
-    percardtranslation = 14,
+    showfullcard = false,
+    maxcards = 8,
   }: CardsDeckProps = $props();
 
+  const ROTATION = 10;
+  const TRANSLATION = 20;
+  let height = 0;
   let deckHeight = $state(0);
   let deckWidth = $state(0);
-
-  let height = $derived(getCardHeight_Fractional(
-    percardrotation * 4,
-    percardtranslation * 4 / 100,
-    deckWidth / 2,
-    -1 * deckHeight));
-
-  // The array of card data to use in the markup
   let cardsData: SvgCardProps[] = $state([]);
 
-  // Recalc each card's properties based on its array index.
   $effect(() => {
-    // console.log("height", height, "deckHeight", deckHeight, "deckWidth/2", deckWidth/2);
+    let percardrotation = ROTATION;
+    let percardtranslation = TRANSLATION;
+
+    let calcshowfullcard = (deckHeight <= 100 || deckWidth <= 450) || showfullcard;
+
+    if (calcshowfullcard) {
+      percardrotation = 0;
+      percardtranslation = 100;
+      height = deckHeight;
+      if (maxcards * height > deckWidth) {
+        let width = deckWidth / maxcards;
+        height = width / ASPECT_RATIO;
+      }
+    } else {
+      height = getCardHeight_Fractional(
+        percardrotation * 4,
+        (percardtranslation * 4) / 100,
+        deckWidth / 2,
+        -1 * deckHeight,
+      );
+    }
+    // console.log("height =", height, "deckHeight =", deckHeight, "deckWidth/2 =", deckWidth/2);
+
+    // Recalc each card's properties based on its array index.
     cardsData = cards.map(
       (card: string, index: number): SvgCardProps => ({
         card,
         index,
         height,
-        rotation: (cards.length == 1 ? 0 : percardrotation * (index - (cards.length - 1.5) / 2)),
+        showfullcard: calcshowfullcard,
+        rotation: cards.length == 1 ? 0
+            : percardrotation * (index - (cards.length - 1.5) / 2),
         translation: percardtranslation * (index - (cards.length - 1) / 2),
-        oncardplayed: () => {
-          console.log(
-            `try to play card at index ${index}, remaining cards ${cards}`,
-          );
-        },
+        oncardplayed
       }),
     );
   });
 
+  function oncardplayed(index: number) {
+    console.log(`Card ${cards[index]} at index ${index} played`);
+  }
 
 </script>
 
@@ -59,12 +77,17 @@
 <style>
   .deck-container {
     container-type: size;
-    width: 100cqh;
+    width: 100cqw;
     height: 25cqh;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+    /* height: min(100px, 17cqh); */
     /* border: 2px solid yellow; */
+  }
+
+  /* landscape on small screens */
+  @media (orientation: landscape) and (height <= 768px) { 
+    .deck-container {
+      height: min(100px, 17cqh);
+    }
   }
 
   .deck {
@@ -74,6 +97,5 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* border: 2px solid black; */
   }
 </style>

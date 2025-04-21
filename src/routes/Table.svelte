@@ -124,7 +124,7 @@
 
 <div class="table-container">
   <div class="table">
-    <!-- {#if gameController.currentPlayer.homeTeam >= 0}
+    {#if gameController.currentPlayer.homeTeam >= 0}
       {#each gameController.gameInfo.teams as { currentScore, scoreNeeded, coolieCount }, index}
         <Coolies
           team={index}
@@ -141,7 +141,7 @@
         {/if}
       {/each}
     {/if}
-
+<!-- 
     {#each gameController.chairs.getAllChairs() as chair}
       {#if chair.Position !== gameController.currentPlayer.playerPosition}
         <Chair
@@ -150,7 +150,8 @@
           totalChairs={chairCount()}
         />
       {/if}
-    {/each} -->
+    {/each} 
+-->
 
     <CardsDeck cards={gameController.currentPlayer.playerCards} />
   </div>

@@ -1,5 +1,5 @@
 // Constants
-const ASPECT_RATIO: number = 140 / 190;
+export const ASPECT_RATIO: number = 140 / 190;
 
 // Helper function to convert degrees to radians
 function degreesToRadians(degrees: number): number {

@@ -16,14 +16,14 @@
 <style>
   .team-score {
     position: absolute;
-    top: min(6vw, 42px);
-    right: min(2vw, 15px);
+    top: min(37px, min(7cqw, 7cqh));
+    right: min(15px, min(3cqw, 3cqh));
     font-size: larger;
   }
 
   .team-score.home-team {
     right: auto;
-    left: min(2vw, 15px);
+    left: min(15px, min(3cqw, 3cqh));
   }
   @media (max-width: 450px) {
     .hide-on-phone {
