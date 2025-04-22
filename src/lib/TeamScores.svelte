@@ -18,6 +18,7 @@
     position: absolute;
     top: min(37px, min(7cqw, 7cqh));
     right: min(15px, min(3cqw, 3cqh));
+    left: auto;
     font-size: larger;
   }
 

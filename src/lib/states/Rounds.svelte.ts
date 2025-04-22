@@ -27,6 +27,17 @@ export interface GameState {
 }
 
 export class RoundsInfo {
+  // Default round definition for when no rounds exist
+  private static readonly defaultNewRound: Round = Object.freeze({
+    FirstPlayer: -1,
+    NextPlayer: -1,
+    PlayedCards: [],
+    TrumpExposed: [],
+    Winner: -1,
+    Score: -1,
+    AutoPlayNextCard: ""
+  });
+
   // Using readonly for immutability
   private readonly _rounds: ReadonlyArray<Round>;
   private readonly _teamScore: ReadonlyArray<number>;
@@ -65,10 +76,10 @@ export class RoundsInfo {
   public get teamScore(): ReadonlyArray<number> { return this._teamScore; }
   
   /**
-   * Get the current round or undefined if no rounds exist
+   * Get the current round or a default new round if no rounds exist
    */
-  public get currentRound(): Round | undefined {
-    return this._rounds.length > 0 ? this._rounds[this._rounds.length - 1] : undefined;
+  public get currentRound(): Round {
+    return this._rounds.length > 0 ? this._rounds[this._rounds.length - 1] : RoundsInfo.defaultNewRound;
   }
 
   /**

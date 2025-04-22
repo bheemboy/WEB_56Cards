@@ -1,5 +1,18 @@
-// Constants
+import { setContext } from "svelte";
+
 export const ASPECT_RATIO: number = 140 / 190;
+
+// Define a unique key for the context
+export const cardHeightContextKey = Symbol("cardHeightContext");
+export interface CardHeightContext {
+  h: number;
+}
+const deckCardHeightContext: CardHeightContext = $state({ h: 0 });
+
+export function setDeckCardHeight(h: number) {
+  deckCardHeightContext.h = h;
+  setContext(cardHeightContextKey, deckCardHeightContext);
+}
 
 // Helper function to convert degrees to radians
 function degreesToRadians(degrees: number): number {
@@ -17,7 +30,7 @@ function degreesToRadians(degrees: number): number {
 function getHeightFromX_Fractional(rotationDegrees: number, translationFraction: number, X: number): number {
   if (X === 0) return 0; // Handle trivial case or case where object might be on Y axis
   if (translationFraction < 0) {
-      console.warn("translationFraction is typically non-negative.");
+    console.warn("translationFraction is typically non-negative.");
   }
 
   const p = translationFraction;
@@ -28,8 +41,8 @@ function getHeightFromX_Fractional(rotationDegrees: number, translationFraction:
   const denominator = ASPECT_RATIO * (0.5 + p) * cosTheta + sinTheta;
 
   if (Math.abs(denominator) < 1e-10) {
-      console.error("Error in getHeightFromX_Fractional: Denominator is too close to zero. Check inputs.");
-      return NaN; // Avoid division by zero
+    console.error("Error in getHeightFromX_Fractional: Denominator is too close to zero. Check inputs.");
+    return NaN; // Avoid division by zero
   }
 
   const h = X / denominator;
@@ -45,10 +58,10 @@ function getHeightFromX_Fractional(rotationDegrees: number, translationFraction:
  * @returns The calculated height 'h'.
  */
 function getHeightFromY_Fractional(rotationDegrees: number, translationFraction: number, Y: number): number {
-   if (Y === 0) return 0; // Handle trivial case where object might be on X axis
-   if (translationFraction < 0) {
-      console.warn("translationFraction is typically non-negative.");
-   }
+  if (Y === 0) return 0; // Handle trivial case where object might be on X axis
+  if (translationFraction < 0) {
+    console.warn("translationFraction is typically non-negative.");
+  }
 
   const p = translationFraction;
   const thetaRad = degreesToRadians(rotationDegrees);
@@ -57,9 +70,9 @@ function getHeightFromY_Fractional(rotationDegrees: number, translationFraction:
   const denominator = 1 + ASPECT_RATIO * (0.5 + p) * sinTheta;
 
   if (Math.abs(denominator) < 1e-10) {
-       // Denominator should be > 1 for typical inputs
-      console.error("Error in getHeightFromY_Fractional: Denominator is too close to zero. Check inputs.");
-      return NaN;
+    // Denominator should be > 1 for typical inputs
+    console.error("Error in getHeightFromY_Fractional: Denominator is too close to zero. Check inputs.");
+    return NaN;
   }
 
   const h = -Y / denominator;
@@ -83,16 +96,16 @@ export function getCardHeight_Fractional(rotationDegrees: number, translationFra
 
   // Check if either calculation resulted in NaN
   if (isNaN(hFromX) && isNaN(hFromY)) {
-      console.error("Both height calculations failed.");
-      return NaN;
+    console.error("Both height calculations failed.");
+    return NaN;
   }
   if (isNaN(hFromX)) {
-       console.warn("getHeightFromX failed, using hFromY.");
-       return hFromY;
+    console.warn("getHeightFromX failed, using hFromY.");
+    return hFromY;
   }
-   if (isNaN(hFromY)) {
-       console.warn("getHeightFromY failed, using hFromX.");
-       return hFromX;
+  if (isNaN(hFromY)) {
+    console.warn("getHeightFromY failed, using hFromX.");
+    return hFromX;
   }
 
   // If X and Y are perfectly consistent, hFromX and hFromY should be almost identical.

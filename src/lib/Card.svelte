@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-  import { ASPECT_RATIO } from "./CardHeight";
-
-  export interface SvgCardProps {
+  import { onMount } from "svelte";
+  import { ASPECT_RATIO } from "./CardHeight.svelte";
+  
+  export interface CardProps {
     card: string;
-    height: number;
-    oncardplayed: (index: number) => void;
+    height: string;
+    oncardplayed?: (index: number) => void;
     showfullcard?: boolean;
     rotation?: number;
     translation?: number;
@@ -15,12 +15,12 @@
   const {
     card,
     height,
-    oncardplayed,
+    oncardplayed = () => {},
     showfullcard = true,
     rotation = 0,
     translation = 0,
     index = 0,
-  }: SvgCardProps = $props();
+  }: CardProps = $props();
 
   let imageError = $state(false);
   async function checkImageExists(card: string): Promise<boolean> {
@@ -61,7 +61,7 @@
     style:--rotation="{rotation}deg"
     style:--translation="{translation}%"
     style:--card-aspect-ratio={ASPECT_RATIO}
-    style:height="{height}px"
+    style:height={height}
     style:background-image="url('/images/svgcards/{card}.svg')"
     onerror={handleImageError}
   ></div>

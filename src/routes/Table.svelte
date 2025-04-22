@@ -10,6 +10,7 @@
   import Coolies from "../lib/Coolies.svelte";
   import TeamScores from "../lib/TeamScores.svelte";
   import Chair from "../lib/Chair.svelte";
+  import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
@@ -110,16 +111,6 @@
       });
     }
   });
-
-  // Calculate total number of chairs based on tableType
-  const chairCount = $derived(() => {
-    const tableTypeMap = { "0": 4, "1": 6, "2": 8 };
-    return (
-      tableTypeMap[
-        gameController.loginParams.tableType as keyof typeof tableTypeMap
-      ] || 4
-    );
-  });
 </script>
 
 <div class="table-container">
@@ -141,17 +132,23 @@
         {/if}
       {/each}
     {/if}
-<!-- 
+
+    <!-- 
     {#each gameController.chairs.getAllChairs() as chair}
       {#if chair.Position !== gameController.currentPlayer.playerPosition}
         <Chair
           {chair}
           currentPlayerPosition={gameController.currentPlayer.playerPosition}
-          totalChairs={chairCount()}
+          totalChairs={maxChairs())}
         />
       {/if}
     {/each} 
 -->
+    <CurrentRoundCards
+      currentRound={gameController.roundsInfo.currentRound}
+      currentPlayerPosition={gameController.currentPlayer.playerPosition}
+      maxPlayers={gameController.tableInfo.maxPlayers}
+    />
 
     <CardsDeck cards={gameController.currentPlayer.playerCards} />
   </div>
@@ -159,38 +156,36 @@
 
 <style>
   .table-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
     container-type: size;
     width: 100vw;
     height: 100vh;
-    position: fixed;
     top: 0;
     left: 0;
+    display: grid;
+    place-items: center;
   }
 
   .table {
+    position: absolute;
     container-type: size;
-    width: 100%;
-    height: 100%;
+    width: 100cqw;
+    height: 100cqh;
     background-image: url("/images/table-background.jpg");
     background-size: cover;
     background-position: center;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    overflow: hidden;
+    display: grid;
+    place-items: center;
   }
 
+  /* larger screens */
   @media (min-width: 1024px) and (min-height: 1024px) {
     .table {
-      width: min(100vh - 10px, 100vw - 10px);
-      height: min(100vh - 10px, 100vw - 10px);
+      width: min(100cqh, 100cqw);
+      height: min(100cqh, 100cqw);
       aspect-ratio: 1;
-      border: solid 5px brown;
-      border-radius: 8px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     }
   }
 </style>

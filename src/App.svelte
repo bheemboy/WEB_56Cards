@@ -5,6 +5,9 @@
   import { gameControllerInstance, gameControllerContextKey } from './lib/GameController.svelte';
   import { alertStoreInstance, alertContextKey } from './lib/AlertStore.svelte';
   import Alert from './lib/Alert.svelte';
+  import { setDeckCardHeight } from './lib/CardHeight.svelte';
+
+  setDeckCardHeight(0);
 
   // Set the alert context with the singleton instance
   setContext(alertContextKey, alertStoreInstance);
