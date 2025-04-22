@@ -169,6 +169,7 @@
   .table {
     position: absolute;
     container-type: size;
+    container-name: cards-table;
     width: 100cqw;
     height: 100cqh;
     background-image: url("/images/table-background.jpg");

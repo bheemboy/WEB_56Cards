@@ -10,31 +10,35 @@
   );
 </script>
 
-<div class:hide-on-phone={!(homeTeam === team)}>
-  <div class="cooliebar" class:home-team={homeTeam === team}>
-    {#each Array(coolieCount) as _, index (index)}
-      <div
-        class="coolie"
-        style:background-image="url({background_image})"
-      ></div>
-    {/each}
-  </div>
+<div class="cooliebar" class:other-team={homeTeam !== team}>
+  {#each Array(coolieCount) as _, index (index)}
+    <div
+      class="coolie"
+      style:background-image="url({background_image})"
+    ></div>
+  {/each}
 </div>
 
 <style>
   .cooliebar {
     position: absolute;
     top: min(1cqw, 10px);
-    right: min(1cqw, 10px);
+    left: min(1cqw, 10px);
     display: flex;
-    flex-direction: row;
+     flex-direction: row;
     gap: 2px;
     /* border: 1px solid white; */
   }
 
-  .cooliebar.home-team {
-    right: auto;
-    left: min(1cqw, 10px);
+  .cooliebar.other-team {
+    left: auto;
+    right: min(1cqw, 10px);
+  }
+
+  @container cards-table (width <= 450px) {
+    .cooliebar.other-team {
+      display: none;
+    }
   }
 
   .coolie {
@@ -43,9 +47,5 @@
     background-size: contain;
     /* border: 1px solid white; */
   }
-  @media (width <= 450px) {
-    .hide-on-phone {
-      display: none;
-    }
-  }
+
 </style>
