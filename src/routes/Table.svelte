@@ -158,6 +158,7 @@
   .table-container {
     position: absolute;
     container-type: size;
+    container-name: cards-table-container;
     width: 100vw;
     height: 100vh;
     top: 0;
@@ -180,7 +181,7 @@
   }
 
   /* larger screens */
-  @media (min-width: 1024px) and (min-height: 1024px) {
+  @container cards-table-container (width > 800px) and (height > 800px) {
     .table {
       width: min(100cqh, 100cqw);
       height: min(100cqh, 100cqw);

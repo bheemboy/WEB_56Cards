@@ -72,14 +72,15 @@
     position: absolute;
     width: auto;
     top: 1px;
+    left: 50%;
+    transform-origin: center bottom;
+    transform: translateX(-50%) rotate(var(--rotation)) translateX(var(--translation));
     box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
     border-radius: 10%;
     aspect-ratio: var(--card-aspect-ratio);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    transform-origin: center bottom;
-    transform: rotate(var(--rotation)) translateX(var(--translation));
     transition:
       transform 0.2s ease-out,
       height 0.2s ease-out;
@@ -94,7 +95,7 @@
   }
 
   .card:hover {
-    transform: rotate(var(--rotation)) translateX(var(--translation))
+    transform: translateX(-50%) rotate(var(--rotation)) translateX(var(--translation))
       translateY(-1em);
   }
 

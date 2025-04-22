@@ -3,7 +3,10 @@
   import { type Round } from "./states/Rounds.svelte";
   import Card from "./Card.svelte";
   import { type CardProps } from "./Card.svelte";
-  import { cardHeightContextKey, type CardHeightContext } from "./CardHeight.svelte";
+  import {
+    cardHeightContextKey,
+    type CardHeightContext,
+  } from "./CardHeight.svelte";
   import { getContext } from "svelte";
 
   export interface CurrentRoundCardsProps {
@@ -11,39 +14,55 @@
     currentPlayerPosition: number;
     maxPlayers: number;
   }
-  let { currentRound, currentPlayerPosition, maxPlayers }: CurrentRoundCardsProps = $props();
+  let {
+    currentRound,
+    currentPlayerPosition,
+    maxPlayers,
+  }: CurrentRoundCardsProps = $props();
 
-  let deckCardHeightContext: CardHeightContext = $state(getContext(cardHeightContextKey))
+  let deckCardHeightContext: CardHeightContext = $state(
+    getContext(cardHeightContextKey),
+  );
+  let gridCellHeight: number = $state(0);
 
   const positionClasses = {
     4: {
       // 4-player game positions
-      0: "self-bottom",
-      1: "p4-opponent-right",
-      2: "p4-opponent-top",
-      3: "p4-opponent-left",
+      0: "B",
+      1: "R",
+      2: "T",
+      3: "L",
     },
     6: {
       // 6-player game positions
-      0: "self-bottom",
-      1: "p6-opponent-bottom-right",
-      2: "p6-opponent-right",
-      3: "p6-opponent-top",
-      4: "p6-opponent-left",
-      5: "p6-opponent-bottom-left",
+      0: "B",
+      1: "R_T",
+      2: "R_B",
+      3: "T",
+      4: "L_T",
+      5: "L_B",
     },
     8: {
       // 8-player game positions
-      0: "self-bottom",
-      1: "p8-opponent-bottom-right",
-      2: "p8-opponent-right",
-      3: "p8-opponent-top-right",
-      4: "p8-opponent-top",
-      5: "p8-opponent-top-left",
-      6: "p8-opponent-left",
-      7: "p8-opponent-bottom-left",
+      0: "B",
+      1: "R_B",
+      2: "R",
+      3: "R_T",
+      4: "T",
+      5: "L_T",
+      6: "L",
+      7: "L_B",
     },
   };
+
+  $inspect(
+    "currentPlayer",
+    currentPlayerPosition,
+    ", FirstPlayer",
+    currentRound.FirstPlayer,
+    ", PlayedCards",
+    currentRound.PlayedCards,
+  );
 
   // Function to determine chair position class
   function getPositionClass(index: number): string {
@@ -51,16 +70,25 @@
     const relativePosn =
       (currentRound.FirstPlayer + index - currentPlayerPosition + maxPlayers) %
       maxPlayers;
+    console.log(
+      "index",
+      index,
+      "class",
+      mapping[relativePosn as keyof typeof mapping],
+    );
     return mapping[relativePosn as keyof typeof mapping];
   }
 </script>
 
-<div class="rounds-container">
+<div class={`card-container p${maxPlayers}`}>
   {#each currentRound.PlayedCards as card, index}
-    <div class={`card-container ${getPositionClass(index)}`}>
+    <div
+      class={`card ${getPositionClass(index)}`}
+      bind:clientHeight={gridCellHeight}
+    >
       <Card
-        card={card}
-        height={deckCardHeightContext.h + "px"}
+        {card}
+        height={Math.min(gridCellHeight, deckCardHeightContext.h) + "px"}
         showfullcard={true}
         rotation={0}
         translation={0}
@@ -70,93 +98,92 @@
 </div>
 
 <style>
-  .rounds-container {
-    container-type: size;
-    position: absolute;
-    width: 50cqw;
-    height: 50cqh;
-    background-color: rgba(22, 22, 22, 0.5);
-  }
-
   .card-container {
     position: absolute;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    width: 60cqw;
+    height: 50cqh;
+    top: 20cqh;
+    /* background-color: rgb(22, 256, 22, 0.5); */
   }
 
-  /* Position classes for 4, 6, and 8 player games */
-  /* 4-player positions */
-  .p4-opponent-right {
-    right: 5%;
-    top: 45%;
-    transform: translateY(-50%);
-  }
-  .p4-opponent-top {
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .p4-opponent-left {
-    left: 5%;
-    top: 45%;
-    transform: translateY(-50%);
+  .card-container.p4 {
+    grid-template-areas:
+      ". T ."
+      "L . R"
+      ". B .";
   }
 
-  /* Additional positions for 6-player game */
-  .p6-opponent-right {
-    right: 8%;
-    top: 20%;
-    transform: translateY(-50%);
-  }
-  .p6-opponent-top {
-    top: 2%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .p6-opponent-left {
-    left: 8%;
-    top: 20%;
-    transform: translateY(-50%);
-  }
-  .p6-opponent-bottom-right {
-    right: 2%;
-    bottom: 40%;
-  }
-  .p6-opponent-bottom-left {
-    left: 2%;
-    bottom: 40%;
+  .card-container.p6 {
+    grid-template-areas:
+      " .   .   T   .   ."
+      "L_T  .   T   .  R_T"
+      "L_T  .   .   .  R_T"
+      "L_B  .   .   .  R_B"
+      "L_B  .   B   .  R_B"
+      " .   .   B   .   .";
   }
 
-  /* Additional positions for 8-player game */
-  .p8-opponent-right {
-    right: 2%;
-    top: 35%;
-    transform: translateY(-50%);
+  .card-container.p8 {
+    grid-template-areas:
+      ".   .   .   T   .   .   ."
+      ".  L_T  .   T   .  R_T  ."
+      ".  L_T  .   .   .  R_T  ."
+      "L   .   .   .   .   .   R"
+      "L   .   .   .   .   .   R"
+      ".  L_B  .   .   .  R_B  ."
+      ".  L_B  .   B   .  R_B  ."
+      ".   .   .   B   .   .   .";
   }
-  .p8-opponent-top {
-    top: 2%;
-    left: 50%;
-    transform: translateX(-50%);
+
+  @media (width > 450px) {
+    .card-container {
+      width: 50cqw;
+      gap: min(1cqw, 1cqh);
+    }
   }
-  .p8-opponent-left {
-    left: 2%;
-    top: 35%;
-    transform: translateY(-50%);
+
+  @media (width > 780px) {
+    .card-container {
+      width: 40cqw;
+      gap: min(2cqw, 2cqh);
+    }
   }
-  .p8-opponent-bottom-right {
-    right: 3%;
-    bottom: 35%;
+
+  .card {
+    position: relative;
   }
-  .p8-opponent-bottom-left {
-    left: 3%;
-    bottom: 35%;
+
+  /* Position classes */
+  .B {
+    grid-area: B;
   }
-  .p8-opponent-top-right {
-    right: 18%;
-    top: 8%;
+
+  .R_B {
+    grid-area: R_B;
   }
-  .p8-opponent-top-left {
-    left: 18%;
-    top: 8%;
+
+  .R {
+    grid-area: R;
+  }
+
+  .R_T {
+    grid-area: R_T;
+  }
+
+  .T {
+    grid-area: T;
+  }
+
+  .L_T {
+    grid-area: L_T;
+  }
+
+  .L {
+    grid-area: L;
+  }
+
+  .L_B {
+    grid-area: L_B;
   }
 </style>
