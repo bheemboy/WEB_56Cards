@@ -15,7 +15,7 @@
   const {
     card,
     height,
-    oncardplayed = () => {},
+    oncardplayed = (index: number) => {},
     showfullcard = true,
     rotation = 0,
     translation = 0,
@@ -71,7 +71,7 @@
   .card {
     position: absolute;
     width: auto;
-    top: 0%;
+    top: 1px;
     box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
     border-radius: 10%;
     aspect-ratio: var(--card-aspect-ratio);
