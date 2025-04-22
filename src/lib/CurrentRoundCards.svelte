@@ -36,8 +36,8 @@
     6: {
       // 6-player game positions
       0: "B",
-      1: "R_T",
-      2: "R_B",
+      1: "R_B",
+      2: "R_T",
       3: "T",
       4: "L_T",
       5: "L_B",
@@ -55,27 +55,12 @@
     },
   };
 
-  $inspect(
-    "currentPlayer",
-    currentPlayerPosition,
-    ", FirstPlayer",
-    currentRound.FirstPlayer,
-    ", PlayedCards",
-    currentRound.PlayedCards,
-  );
-
   // Function to determine chair position class
   function getPositionClass(index: number): string {
     const mapping = positionClasses[maxPlayers as 4 | 6 | 8];
     const relativePosn =
       (currentRound.FirstPlayer + index - currentPlayerPosition + maxPlayers) %
       maxPlayers;
-    console.log(
-      "index",
-      index,
-      "class",
-      mapping[relativePosn as keyof typeof mapping],
-    );
     return mapping[relativePosn as keyof typeof mapping];
   }
 </script>
