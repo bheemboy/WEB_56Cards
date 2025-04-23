@@ -55,50 +55,45 @@
   function getTeamClass(chair: Chair): string {
     return chair.Position % 2 === 0 ? "team-blue" : "team-red";
   }
-
 </script>
 
 {#each game.chairs.getAllChairs() as chair}
-  <!-- {#if chair.Position !== game.currentPlayer.playerPosition} -->
-    <div class={`chair ${getPositionClass(chair)} ${getTeamClass(chair)}`}>
-      {chair.Occupant?.Name ?? ""}
-    </div>
-  <!-- {/if} -->
+  <div class={`playername ${getPositionClass(chair)} ${getTeamClass(chair)} T${game.tableInfo.maxPlayers}`}>
+    {chair.Occupant?.Name ?? ""}
+  </div>
 {/each}
 
 <style>
-  .chair {
+  .playername {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    font-size: 1.5rem;
+    font-size: larger;
     background-color: rgba(0, 0, 255, 0.3);
-    border: 1px solid rgba(0, 0, 255, 0.5);
+    border: 3px solid rgba(0, 0, 255, 0.5);
     width: 2rem;
-    height: 8rem;
-    border-radius: 2cqw;
+    height: max(100px, 12cqh);
+    border-radius: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0.2rem;
   }
 
   .team-red {
     background-color: rgba(255, 0, 0, 0.4);
-    border: 1px solid rgba(255, 0, 0, 0.5);
+    border: 3px solid rgba(255, 0, 0, 0.5);
   }
 
   .B {
-    writing-mode: horizontal-tb;
-    width: 8rem;
-    height: 2rem;
-    z-index: 1;
-    bottom: 0cqh;
+    visibility: hidden;
   }
 
   .R_B {
     right: 0cqw;
-    top: 57cqh; 
+    top: 57cqh;
   }
 
   .R {
@@ -108,7 +103,7 @@
 
   .R_T {
     right: 0cqw;
-    top: 17cqh; 
+    top: 17cqh;
   }
 
   .T {
@@ -122,16 +117,49 @@
 
   .L_T {
     left: 0cqw;
-    top: 17cqh; 
+    top: 17cqh;
   }
 
   .L {
     left: 0cqw;
-    top: 37cqh; 
+    top: 37cqh;
   }
 
   .L_B {
     left: 0cqw;
-    top: 57cqh; 
+    top: 57cqh;
+  }
+
+  @container cards-table (orientation: landscape) and (height < 450px) {
+    .T {
+      top: 0cqh;
+    }
+
+    .R_B.T8 {
+      right: 6cqw;
+    }
+
+    .R_T.T8 {
+      right: 6cqw;
+    }
+
+    .L_T.T8 {
+      left: 6cqw;
+    }
+
+    .L_B.T8 {
+      left: 6cqw;
+    }
+  }
+
+  @container cards-table (height > 450px) {
+    .B {
+      visibility: visible;
+      writing-mode: horizontal-tb;
+      width: 8rem;
+      height: 2rem;
+      z-index: 1;
+      bottom: 0cqh;
+    }
   }
 </style>
