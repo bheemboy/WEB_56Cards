@@ -86,6 +86,7 @@
   .card-container {
     position: absolute;
     display: grid;
+    gap: min(1cqw, 1cqh);
     width: 60cqw;
     height: 50cqh;
     top: 20cqh;
@@ -121,17 +122,22 @@
       ".   .   .   B   .   .   .";
   }
 
-  @media (width > 450px) {
+  @container cards-table (orientation: landscape) and (height < 450px) {
     .card-container {
-      width: 50cqw;
-      gap: min(1cqw, 1cqh);
+      height: 60cqh;
+      top: 15cqh;
     }
   }
 
-  @media (width > 780px) {
+  @container cards-table (width > 450px) {
+    .card-container {
+      width: 50cqw;
+    }
+  }
+
+  @container cards-table (width > 780px) {
     .card-container {
       width: 40cqw;
-      gap: min(2cqw, 2cqh);
     }
   }
 
