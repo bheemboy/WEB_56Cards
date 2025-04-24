@@ -48,10 +48,8 @@
 
 <style>
   .score-container {
-    position: absolute;
-    top: calc(min(1cqw, 10px) + clamp(15px, min(2.5cqw, 2.5cqh), 25px) + 2px);
-    left: min(1cqw, 10px);
-    width: clamp(180px, min(30cqw, 30cqh), 300px);
+    position: relative;
+    top: 3px;
     height: 12px;
     border: 1px solid #333;
     overflow: hidden;

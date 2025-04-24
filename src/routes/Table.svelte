@@ -8,7 +8,6 @@
   import { ConnectionState } from "../lib/HubConnection.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
-  import TeamScores from "../lib/TeamScores.svelte";
   import Chairs from "../lib/Chairs.svelte";
   import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
 
@@ -116,8 +115,6 @@
 <div class="table-container">
   <div class="table">
     <Coolies />
-
-    <TeamScores />
 
     <Chairs/>
 

@@ -4,6 +4,7 @@
     GameController,
     gameControllerContextKey,
   } from "../lib/GameController.svelte";
+  import TeamScores from "../lib/TeamScores.svelte";
 
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
@@ -13,20 +14,28 @@
 </script>
 
 
-<div class="cooliebar">
-  {#each Array(game.gameInfo.coolieCount[game.currentPlayer.homeTeam]) as _, index (index)}
-    <div class="coolie" style:background-image="url({homeTeamCoolieImage})"></div>
-  {/each}
-  {#each Array(game.gameInfo.coolieCount[game.currentPlayer.opposingTeam]) as _, index (index)}
-    <div class="coolie" style:background-image="url({opposingTeamCoolieImage})"></div>
-  {/each}
+<div class="coolie-score-container">
+  <div class="cooliebar">
+    {#each Array(game.gameInfo.coolieCount[game.currentPlayer.homeTeam]) as _, index (index)}
+      <div class="coolie" style:background-image="url({homeTeamCoolieImage})"></div>
+    {/each}
+    {#each Array(game.gameInfo.coolieCount[game.currentPlayer.opposingTeam]) as _, index (index)}
+      <div class="coolie" style:background-image="url({opposingTeamCoolieImage})"></div>
+    {/each}
+  </div>
+
+  <TeamScores />
 </div>
 
 <style>
-  .cooliebar {
+  .coolie-score-container {
     position: absolute;
     top: min(1cqw, 10px);
     left: min(1cqw, 10px);
+  }
+
+  .cooliebar {
+    position: relative;
     display: flex;
     flex-direction: row;
     gap: 1px;
