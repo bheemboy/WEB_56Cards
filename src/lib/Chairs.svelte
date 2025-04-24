@@ -13,35 +13,35 @@
   const positionClasses = {
     4: {
       // 4-player game positions
-      0: "B",
-      1: "R",
-      2: "T",
-      3: "L",
+      0: "bottom",
+      1: "right vertical",
+      2: "top",
+      3: "left vertical",
     },
     6: {
       // 6-player game positions
-      0: "B",
-      1: "R_B",
-      2: "R_T",
-      3: "T",
-      4: "L_T",
-      5: "L_B",
+      0: "bottom",
+      1: "right bottom vertical",
+      2: "right top vertical",
+      3: "top",
+      4: "left top vertical",
+      5: "left bottom vertical",
     },
     8: {
       // 8-player game positions
-      0: "B",
-      1: "R_B",
-      2: "R",
-      3: "R_T",
-      4: "T",
-      5: "L_T",
-      6: "L",
-      7: "L_B",
+      0: "bottom",
+      1: "right bottom vertical",
+      2: "right vertical",
+      3: "right top vertical",
+      4: "top",
+      5: "left top vertical",
+      6: "left vertical",
+      7: "left bottom vertical",
     },
   };
 
   // Function to determine chair position class
-  function getPositionClass(chair: Chair): string {
+  function getPositionClasses(chair: Chair): string {
     const mapping = positionClasses[game.tableInfo.maxPlayers as 4 | 6 | 8];
     const relativePosn =
       (chair.Position -
@@ -58,28 +58,27 @@
 </script>
 
 {#each game.chairs.getAllChairs() as chair}
-  <div class={`playername ${getPositionClass(chair)} ${getTeamClass(chair)} T${game.tableInfo.maxPlayers}`}>
-    {chair.Occupant?.Name ?? ""}
+  <div
+    class={`player-box ${getPositionClasses(chair)} ${getTeamClass(chair)} T${game.tableInfo.maxPlayers}`}
+  >
+    <span class="player-name">{chair.Occupant?.Name ?? ""}</span>
   </div>
 {/each}
 
 <style>
-  .playername {
+  .player-box {
+    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: larger;
     background-color: rgba(0, 0, 255, 0.3);
     border: 3px solid rgba(0, 0, 255, 0.5);
-    width: 2rem;
-    height: max(100px, 12cqh);
     border-radius: 10px;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    box-sizing: border-box;
+    height: 40px;
+    width: max(130px, 12cqw);
+    z-index: 1;
   }
 
   .team-red {
@@ -87,79 +86,82 @@
     border: 3px solid rgba(255, 0, 0, 0.5);
   }
 
-  .B {
-    visibility: hidden;
+  .vertical {
+    height: max(130px, 12cqw);
+    width: 40px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
   }
 
-  .R_B {
+  .right.bottom {
+    top: 60cqh;
+  }
+
+  .right {
     right: 0cqw;
-    top: 57cqh;
+    top: 38cqh;
   }
 
-  .R {
-    right: 0cqw;
-    top: 37cqh;
+  .right.top {
+    top: 16cqh;
   }
 
-  .R_T {
-    right: 0cqw;
-    top: 17cqh;
-  }
-
-  .T {
-    grid-area: T;
-    writing-mode: horizontal-tb;
-    width: 8rem;
-    height: 2rem;
-    z-index: 1;
+  .top {
     top: min(50px, min(13cqw, 13cqh));
   }
 
-  .L_T {
-    left: 0cqw;
-    top: 17cqh;
+  .left.top {
+    top: 16cqh;
   }
 
-  .L {
+  .left {
     left: 0cqw;
-    top: 37cqh;
+    top: 38cqh;
   }
 
-  .L_B {
-    left: 0cqw;
-    top: 57cqh;
+  .left.bottom {
+    top: 60cqh;
+  }
+
+  .player-box.bottom:not(.left):not(.right) {
+    bottom: 0cqh;
+    height: 25px;
+    width: max(130px, 12cqw);
   }
 
   @container cards-table (orientation: landscape) and (height < 450px) {
-    .T {
+    .vertical.T8 {
+      height: max(100px, 12cqw);
+    }
+
+    .top {
       top: 0cqh;
     }
 
-    .R_B.T8 {
+    .right.bottom.T8 {
       right: 6cqw;
     }
 
-    .R_T.T8 {
+    .right.top.T8 {
       right: 6cqw;
     }
 
-    .L_T.T8 {
+    .left.top.T8 {
       left: 6cqw;
     }
 
-    .L_B.T8 {
+    .left.bottom.T8 {
       left: 6cqw;
     }
   }
 
-  @container cards-table (height > 450px) {
-    .B {
-      visibility: visible;
-      writing-mode: horizontal-tb;
-      width: 8rem;
-      height: 2rem;
-      z-index: 1;
-      bottom: 0cqh;
-    }
+  .player-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 8px;
+    max-width: 100%;
+    max-height: 100%;
   }
 </style>

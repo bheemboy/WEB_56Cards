@@ -80,11 +80,16 @@
 <style>
   .deck-container {
     position: absolute;
-    bottom: 0px;
+    bottom: 26px;
     display: grid;
     place-items: center;
     width: 100cqw;
     height: 20cqh;
     /* background-color: rgba(22, 256, 22, 0.5); */
+  }
+  @container cards-table (orientation: landscape) and (height < 450px) {
+    .deck-container {
+      height: 13cqh;
+    }
   }
 </style>
