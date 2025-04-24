@@ -117,11 +117,6 @@
   <div class="table">
     {#if gameController.currentPlayer.homeTeam >= 0}
       {#each gameController.gameInfo.teams as { currentScore, scoreNeeded, coolieCount }, index}
-        <Coolies
-          team={index}
-          homeTeam={gameController.currentPlayer.homeTeam}
-          {coolieCount}
-        />
         {#if gameController.gameInfo.gameStage >= 4 && !gameController.gameInfo.gameCancelled && !gameController.gameInfo.gameForfeited}
           <TeamScores
             team={index}
@@ -133,7 +128,8 @@
       {/each}
     {/if}
 
-    
+    <Coolies />
+
     <Chairs/>
 
     <CurrentRoundCards

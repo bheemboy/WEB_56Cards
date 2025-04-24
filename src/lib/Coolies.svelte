@@ -1,21 +1,24 @@
 <script lang="ts">
-  let { team, homeTeam, coolieCount } = $props<{
-    team: number;
-    homeTeam: number;
-    coolieCount: number;
-  }>();
+  import { getContext } from "svelte";
+  import {
+    GameController,
+    gameControllerContextKey,
+  } from "../lib/GameController.svelte";
 
-  let background_image = $derived(
-    `images/Glass_button_${team === 0 ? "blue" : "red"}.svg`,
-  );
+  // Get the hub instance from the context
+  const game: GameController = getContext(gameControllerContextKey);
+  const homeTeamCoolieImage = `images/Glass_button_${game.currentPlayer.homeTeam === 0 ? "blue" : "red"}.svg`;
+  const opposingTeamCoolieImage = `images/Glass_button_${game.currentPlayer.homeTeam !== 0 ? "blue" : "red"}.svg`;
+
 </script>
 
-<div class="cooliebar" class:other-team={homeTeam !== team}>
-  {#each Array(coolieCount) as _, index (index)}
-    <div
-      class="coolie"
-      style:background-image="url({background_image})"
-    ></div>
+
+<div class="cooliebar">
+  {#each Array(game.gameInfo.coolieCount[game.currentPlayer.homeTeam]) as _, index (index)}
+    <div class="coolie" style:background-image="url({homeTeamCoolieImage})"></div>
+  {/each}
+  {#each Array(game.gameInfo.coolieCount[game.currentPlayer.opposingTeam]) as _, index (index)}
+    <div class="coolie" style:background-image="url({opposingTeamCoolieImage})"></div>
   {/each}
 </div>
 
@@ -25,27 +28,15 @@
     top: min(1cqw, 10px);
     left: min(1cqw, 10px);
     display: flex;
-     flex-direction: row;
-    gap: 2px;
+    flex-direction: row;
+    gap: 1px;
     /* border: 1px solid white; */
   }
 
-  .cooliebar.other-team {
-    left: auto;
-    right: min(1cqw, 10px);
-  }
-
-  @container cards-table (width <= 450px) {
-    .cooliebar.other-team {
-      display: none;
-    }
-  }
-
   .coolie {
-    width: min(25px, min(5cqw, 5cqh));
+    width: clamp(15px, min(2.5cqw, 2.5cqh), 25px);
     aspect-ratio: 1;
     background-size: contain;
     /* border: 1px solid white; */
   }
-
 </style>
