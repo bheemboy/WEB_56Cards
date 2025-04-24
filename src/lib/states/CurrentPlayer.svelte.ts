@@ -80,7 +80,7 @@ export class CurrentPlayer {
     return this._playerPosition >= 0 ? this._playerPosition % 2 : -1; 
   }
   
-  public get opposingTeam(): number { 
+  public get otherTeam(): number { 
     return this._playerPosition >= 0 ? 1 - this._playerPosition % 2 : -1; 
   }
   
@@ -176,7 +176,7 @@ export class CurrentPlayer {
     playerPosition: number;
     playerCards: string[];
     homeTeam: number;
-    opposingTeam: number;
+    otherTeam: number;
   } {
     return {
       playerID: this._playerID,
@@ -186,7 +186,7 @@ export class CurrentPlayer {
       playerPosition: this._playerPosition,
       playerCards: [...this._playerCards],
       homeTeam: this.homeTeam,
-      opposingTeam: this.opposingTeam
+      otherTeam: this.otherTeam
     };
   }
 }

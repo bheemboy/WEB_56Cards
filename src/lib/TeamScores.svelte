@@ -10,18 +10,19 @@
   const TOTALPOINTS = 56;
   
   // Calculate percentages for the widths (memoized with $derived)
-  let homeWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.homeTeam]) / TOTALPOINTS);
-  let otherWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.opposingTeam]) / TOTALPOINTS);
-  let targetPos = $derived((100.0 * game.bidInfo.highBid) / TOTALPOINTS);
-  let homeTeamScore: string = $derived(game.roundsInfo.teamScore[game.currentPlayer.homeTeam] > 0 ? game.roundsInfo.teamScore[game.currentPlayer.homeTeam].toString() : "");
-  let otherTeamScore: string = $derived(game.roundsInfo.teamScore[game.currentPlayer.opposingTeam] > 0 ? game.roundsInfo.teamScore[game.currentPlayer.opposingTeam].toString() : "");
+  const homeWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.homeTeam]) / TOTALPOINTS);
+  const otherWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.otherTeam]) / TOTALPOINTS);
+  const homeTeamScore: string = $derived(game.roundsInfo.teamScore[game.currentPlayer.homeTeam] > 0 ? game.roundsInfo.teamScore[game.currentPlayer.homeTeam].toString() : "");
+  const otherTeamScore: string = $derived(game.roundsInfo.teamScore[game.currentPlayer.otherTeam] > 0 ? game.roundsInfo.teamScore[game.currentPlayer.otherTeam].toString() : "");
+
+  const targetPos = $derived((game.currentPlayer.homeTeam === game.bidInfo.biddingTeam ? game.bidInfo.highBid : (TOTALPOINTS-game.bidInfo.highBid+1)) * 100.0 / TOTALPOINTS);
 
   // Determine diamond color based on game state
   const targetMarkerColor : string = $derived.by(() => {
     if (game.roundsInfo.teamScore[game.currentPlayer.homeTeam] >= game.bidInfo.getPointsNeeded(game.currentPlayer.homeTeam)) {
-      return game.currentPlayer.homeTeam % 2 === 0 ? "blue": "red"
-    } else if (game.roundsInfo.teamScore[game.currentPlayer.opposingTeam] >= game.bidInfo.getPointsNeeded(game.currentPlayer.opposingTeam)) {
-      return game.currentPlayer.opposingTeam % 2 === 0 ? "blue": "red"
+      return game.currentPlayer.homeTeam === 0 ? "blue": "red"
+    } else if (game.roundsInfo.teamScore[game.currentPlayer.otherTeam] >= game.bidInfo.getPointsNeeded(game.currentPlayer.otherTeam)) {
+      return game.currentPlayer.otherTeam === 0 ? "blue": "red"
     } else {
       return "white";
     }
@@ -30,13 +31,11 @@
 </script>
 
 <div class="score-container">
-  <!-- Home Team Score (Blue) - starts from left -->
-  <div class="home-team-score" style:width="{homeWidth}%">
+  <div class={`team-score left team${game.currentPlayer.homeTeam}`} style:width="{homeWidth}%">
     <span class="score-text">{homeTeamScore}</span>
   </div>
  
-  <!-- Other Team Score (Red) - starts from right -->
-  <div class="other-team-score" style:width="{otherWidth}%">
+  <div class={`team-score right team${game.currentPlayer.otherTeam}`} style:width="{otherWidth}%">
     <span class="score-text">{otherTeamScore}</span>
   </div>
  
@@ -54,29 +53,31 @@
     border: 1px solid #333;
     overflow: hidden;
   }
- 
-  .home-team-score {
+  
+  .team-score {
     position: absolute;
     top: 0cqh;
-    left: 0cqw;
     height: 100%;
-    background-color: rgba(0, 0, 255, 0.3);
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
- 
-  .other-team-score {
-    position: absolute;
-    top: 0cqh;
+
+  .team-score.left {
+    left: 0cqw;
+  }
+
+  .team-score.right {
     right: 0;
-    height: 100%;
+  }
+
+  .team-score.team0 {
+    background-color: rgba(0, 0, 255, 0.3);
+  }
+ 
+  .team-score.team1 {
     background-color: rgba(255, 0, 0, 0.4);
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
  
   .score-text {
