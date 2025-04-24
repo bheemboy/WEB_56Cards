@@ -8,8 +8,8 @@
 
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
-  const homeTeamCoolieImage = `images/Glass_button_${game.currentPlayer.homeTeam === 0 ? "blue" : "red"}.svg`;
-  const opposingTeamCoolieImage = `images/Glass_button_${game.currentPlayer.otherTeam === 0 ? "blue" : "red"}.svg`;
+
+  $inspect(game.currentPlayer.homeTeam, game.currentPlayer.otherTeam);
 
 </script>
 
@@ -17,10 +17,14 @@
 <div class="coolie-score-container">
   <div class="cooliebar">
     {#each Array(game.gameInfo.coolieCount[game.currentPlayer.homeTeam]) as _, index (index)}
-      <div class="coolie" style:background-image="url({homeTeamCoolieImage})"></div>
+      <div class="coolie"
+        style:background-image="url({`images/Glass_button_${game.currentPlayer.homeTeam === 0 ? "blue" : "red"}.svg`})">
+      </div>
     {/each}
     {#each Array(game.gameInfo.coolieCount[game.currentPlayer.otherTeam]) as _, index (index)}
-      <div class="coolie" style:background-image="url({opposingTeamCoolieImage})"></div>
+      <div class="coolie" 
+        style:background-image="url({`images/Glass_button_${game.currentPlayer.otherTeam === 0 ? "blue" : "red"}.svg`})">
+      </div>
     {/each}
   </div>
 
