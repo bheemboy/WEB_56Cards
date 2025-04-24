@@ -72,7 +72,7 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 255, 0.3);
-    border: 3px solid rgba(0, 0, 255, 0.5);
+    border: 1px solid rgba(0, 0, 255, 0.5);
     border-radius: 10px;
     overflow: hidden;
     box-sizing: border-box;
@@ -83,7 +83,7 @@
 
   .team-red {
     background-color: rgba(255, 0, 0, 0.4);
-    border: 3px solid rgba(255, 0, 0, 0.5);
+    border: 1px solid rgba(255, 0, 0, 0.5);
   }
 
   .vertical {
