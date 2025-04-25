@@ -9,7 +9,7 @@
   const localLoginParams = $state(gameController.loginParams.clone());
 
   async function playGame(watch = false) {
-    if (!localLoginParams.userName) {
+    if (!localLoginParams.username) {
       alert("Please enter your name before joining the game");
       return;
     }
@@ -20,9 +20,9 @@
       await gameController.updateLoginParams(localLoginParams);
 
       const params = {
-        userName: gameController.loginParams.userName,
-        tableType: gameController.loginParams.tableType,
-        tableName: gameController.loginParams.tableName,
+        username: gameController.loginParams.username,
+        tabletype: gameController.loginParams.tabletype,
+        tablename: gameController.loginParams.tablename,
         language: gameController.loginParams.language,
         watch: gameController.loginParams.watch ? 1 : 0
       };
@@ -52,20 +52,20 @@
 
     <form>
       <div class="form-group">
-        <label for="userName">Player Name</label>
+        <label for="username">Player Name</label>
         <input
-          id="userName"
+          id="username"
           type="text"
-          bind:value={localLoginParams.userName}
+          bind:value={localLoginParams.username}
           placeholder="Enter your name"
           required
         />
       </div>
 
       <div class="form-group">
-        <label for="tableType">Table Size</label>
+        <label for="tabletype">Table Size</label>
         <div class="select-wrapper">
-          <select id="tableType" bind:value={localLoginParams.tableType}>
+          <select id="tabletype" bind:value={localLoginParams.tabletype}>
             <option value="0">4 Players</option>
             <option value="1">6 Players</option>
             <option value="2">8 Players</option>
@@ -74,11 +74,11 @@
       </div>
 
       <div class="form-group">
-        <label for="tableName">Table Name (Optional)</label>
+        <label for="tablename">Table Name (Optional)</label>
         <input
-          id="tableName"
+          id="tablename"
           type="text"
-          bind:value={localLoginParams.tableName}
+          bind:value={localLoginParams.tablename}
           placeholder="Leave empty for random table"
         />
       </div>

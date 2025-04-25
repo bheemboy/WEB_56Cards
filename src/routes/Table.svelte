@@ -13,110 +13,49 @@
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
-  let connectionAttempted = $state(false);
-  let initializing = $state(true);
 
-  // Initialize connection when component mounts
-  onMount(async () => {
-    // Get current URL params right away
+  onMount(() => {
+    // Process URL params when the component mounts
     const url = new URL(window.location.href);
     const rawParams = new URLSearchParams(url.search);
     const params = Object.fromEntries(
-      Array.from(rawParams.entries()).map(([key, value]) => [
-        key.toLowerCase(),
-        value,
-      ]),
+      Array.from(rawParams.entries()).map(([key, value]) => {
+        const lowerKey = key.toLowerCase();
+        // Special handling for 'watch' parameter
+        if (lowerKey === 'watch') {
+          if (value === '1' || value.toLowerCase() === 'true') return [lowerKey, true];
+          if (value === '0' || value.toLowerCase() === 'false') return [lowerKey, false];
+        }
+        return [lowerKey, value];
+      })
     );
-
-    try {
-      // First update login params
-      await handleParamsUpdate(params);
-
-      // Then ensure we're connected
-      if (
-        gameController.connectionState !== ConnectionState.CONNECTED &&
-        gameController.connectionState !== ConnectionState.CONNECTING
-      ) {
-        await gameController.connect();
-      }
-    } catch (err) {
-      console.error("Error during initialization:", err);
-    } finally {
-      initializing = false;
-    }
+    gameController.updateLoginParams(params);
   });
 
   // Create an effect that watches URL changes
   $effect(() => {
-    // Don't handle URL changes during initialization
-    if (initializing) return;
-
-    // Get current URL params
-    const url = new URL(window.location.href);
-    const rawParams = new URLSearchParams(url.search);
-    const params = Object.fromEntries(
-      Array.from(rawParams.entries()).map(([key, value]) => [
-        key.toLowerCase(),
-        value,
-      ]),
-    );
-
-    handleParamsUpdate(params);
-  });
-
-  async function handleParamsUpdate(params: Record<string, string>) {
     try {
-      // Update login params and check if anything changed
-      const [, paramsChanged] = await gameController.updateLoginParams({
-        userName: params.username ?? gameController.loginParams.userName,
-        tableType: params.tabletype ?? gameController.loginParams.tableType,
-        tableName: params.tablename ?? gameController.loginParams.tableName,
-        language: params.language ?? gameController.loginParams.language,
-        watch: params.watch === "1",
-      });
-
-      // Mark connection as attempted
-      connectionAttempted = true;
-
-      // Force reconnection if any parameter changed
-      if (paramsChanged) {
-        // Disconnect if already connected
-        if (gameController.connectionState === ConnectionState.CONNECTED) {
-          await gameController.disconnect();
-          // Add a small delay to ensure disconnect completes
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-
-        // Only attempt to connect if needed
-        if (
-          gameController.connectionState !== ConnectionState.CONNECTED &&
-          gameController.connectionState !== ConnectionState.CONNECTING
-        ) {
-          await gameController.connect();
-        }
+      const connectionState = gameController.connectionState;
+      // Then ensure we're connected
+      if (connectionState !== ConnectionState.CONNECTED && connectionState !== ConnectionState.CONNECTING) {
+        gameController.connect();
+      } else if (connectionState === ConnectionState.CONNECTED) {
+        gameController.registerPlayer().catch((err) => {
+          console.error("Registration failed:", err);
+        });
       }
     } catch (err) {
-      console.error("Error handling parameter update:", err);
-    }
-  }
-
-  // Use $effect to register player when connection state changes to CONNECTED
-  $effect(() => {
-    const connectionState = gameController.connectionState;
-
-    if (connectionState === ConnectionState.CONNECTED && connectionAttempted) {
-      gameController.registerPlayer().catch((err) => {
-        console.error("Registration failed:", err);
-      });
+      console.error("Error during initialization:", err);
     }
   });
+
 </script>
 
 <div class="table-container">
   <div class="table">
     <Coolies />
 
-    <Chairs/>
+    <Chairs />
 
     <CurrentRoundCards
       currentRound={gameController.roundsInfo.currentRound}

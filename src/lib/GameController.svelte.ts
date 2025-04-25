@@ -107,12 +107,6 @@ export class GameController {
 
     this._hubConnector = new HubConnector(hubUrl);
     this.registerEventHandlers();
-
-    // Connect automatically
-    // this._hubConnector.connect().catch((err: unknown) => {
-    //   this._alertStore.showError("Could not connect to Cards56Hub on server.", "Fatal error: ", 0);
-    //   console.error("Failed to connect to SignalR hub:", err);
-    // });
   }
 
   // Method to update login params - SIMPLIFIED
@@ -121,21 +115,10 @@ export class GameController {
     if (changed) {
       this._loginParams = updatedParams;
       console.info("LoginParams changed:", this._loginParams);
-
-      // Just disconnect if we have a player ID - Table.svelte will handle reconnection
-      if (this._playerId) {
-        try {
-          await this._hubConnector.disconnect();
-
-          // Wait for connection state to fully update
-          // This prevents the effect in Table.svelte from firing too early
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } catch (err) {
-          console.error("Error during disconnect:", err);
-        }
-
-        // Reset player ID
-        this._playerId = null;
+      try {
+        await this.unregiterPlayer();
+      } catch (err) {
+        console.error("Error during unregisterPlayer:", err);
       }
     }
     return [updatedParams, changed];
@@ -203,7 +186,7 @@ export class GameController {
       // Automatically join table after registration completes
       if (!player.tableName) {
         // Join table
-        this._hubConnector.invokeMethod("JoinTable", parseInt(this._loginParams.tableType), this._loginParams.tableName)
+        this._hubConnector.invokeMethod("JoinTable", parseInt(this._loginParams.tabletype), this._loginParams.tablename)
           .catch(error => {
             console.error("Error invoking JoinTable:", error);
           });
@@ -240,7 +223,7 @@ export class GameController {
       await this._hubConnector.invokeMethod(
         "RegisterPlayer",
         this._playerId || "",
-        this._loginParams.userName,
+        this._loginParams.username,
         this._loginParams.language,
         this._loginParams.watch
       );
@@ -251,6 +234,11 @@ export class GameController {
     }
   }
   
+  public async unregiterPlayer(): Promise<void> {
+    this._playerId = null;
+    return this._hubConnector.invokeMethod("UnregiterPlayer");
+  }
+
   public async placeBid(bid: number): Promise<void> {
     return this._hubConnector.invokeMethod("PlaceBid", bid);
   }

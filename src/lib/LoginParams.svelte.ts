@@ -1,47 +1,47 @@
 // Create LoginParams class first
 export interface LoginParamsData {
-  userName: string;
-  tableType: string;
-  tableName: string;
+  username: string;
+  tabletype: string;
+  tablename: string;
   language: string;
   watch: boolean;
 }
 
 const defaultLoginParamsData: LoginParamsData = {
-  userName: "",
-  tableType: "0",
-  tableName: "",
+  username: "",
+  tabletype: "0",
+  tablename: "",
   language: "ml",
   watch: false
 };
 
 export class LoginParams {
-  private readonly _userName: string;
-  private readonly _tableType: string;
-  private readonly _tableName: string;
+  private readonly _username: string;
+  private readonly _tabletype: string;
+  private readonly _tablename: string;
   private readonly _language: string;
   private readonly _watch: boolean;
 
   // Private constructor - use factory methods instead
   private constructor(data: Partial<LoginParamsData>) {
-    this._userName = data.userName || defaultLoginParamsData.userName;
-    this._tableType = data.tableType || defaultLoginParamsData.tableType;
-    this._tableName = data.tableName || defaultLoginParamsData.tableName;
+    this._username = data.username || defaultLoginParamsData.username;
+    this._tabletype = data.tabletype || defaultLoginParamsData.tabletype;
+    this._tablename = data.tablename || defaultLoginParamsData.tablename;
     this._language = data.language || defaultLoginParamsData.language;
     this._watch = typeof data.watch === 'boolean' ? data.watch : defaultLoginParamsData.watch;
   }
 
   // Getters
-  public get userName(): string {
-    return this._userName;
+  public get username(): string {
+    return this._username;
   }
 
-  public get tableType(): string {
-    return this._tableType;
+  public get tabletype(): string {
+    return this._tabletype;
   }
 
-  public get tableName(): string {
-    return this._tableName;
+  public get tablename(): string {
+    return this._tablename;
   }
 
   public get language(): string {
@@ -109,18 +109,18 @@ export class LoginParams {
 
     // Construct the potential new data state by merging
     const potentialNewData: LoginParamsData = {
-        userName: newData.userName !== undefined ? newData.userName : current.userName,
-        tableType: newData.tableType !== undefined ? newData.tableType : current.tableType,
-        tableName: newData.tableName !== undefined ? newData.tableName : current.tableName,
+        username: newData.username !== undefined ? newData.username : current.username,
+        tabletype: newData.tabletype !== undefined ? newData.tabletype : current.tabletype,
+        tablename: newData.tablename !== undefined ? newData.tablename : current.tablename,
         language: newData.language !== undefined ? newData.language : current.language,
         watch: newData.watch !== undefined ? newData.watch : current.watch
     };
 
     // Check if any value actually changed compared to the current instance
     const hasChanged =
-      potentialNewData.userName !== current.userName ||
-      potentialNewData.tableType !== current.tableType ||
-      potentialNewData.tableName !== current.tableName ||
+      potentialNewData.username !== current.username ||
+      potentialNewData.tabletype !== current.tabletype ||
+      potentialNewData.tablename !== current.tablename ||
       potentialNewData.language !== current.language ||
       potentialNewData.watch !== current.watch;
 
@@ -147,9 +147,9 @@ export class LoginParams {
   // unchanged clone method
   public clone(): LoginParamsData {
     return {
-      userName: this._userName,
-      tableType: this._tableType,
-      tableName: this._tableName,
+      username: this._username,
+      tabletype: this._tabletype,
+      tablename: this._tablename,
       language: this._language,
       watch: this._watch
     };
