@@ -9,7 +9,7 @@
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
 
-  $inspect(game.currentPlayer.homeTeam, game.currentPlayer.otherTeam);
+  // $inspect(game.currentPlayer.homeTeam, game.currentPlayer.otherTeam);
 
 </script>
 
