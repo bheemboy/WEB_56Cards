@@ -49,7 +49,7 @@
   .score-container {
     position: relative;
     top: 3px;
-    height: 12px;
+    height: clamp(12px, 1.5vh, 15px);
     border: 1px solid #333;
     overflow: hidden;
   }
@@ -81,7 +81,7 @@
   }
  
   .score-text {
-    font-size: 10px;
+    font-size: clamp(10px, 1.5vh, 15px);
     color: white;
     text-shadow: 0px 0px 2px #000;
     padding-inline: 2px;
@@ -100,7 +100,6 @@
   }
  
   .target span {
-    font-size: 14px;
     text-shadow: 0px 0px 2px #000;
   }
 </style>
