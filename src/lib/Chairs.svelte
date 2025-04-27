@@ -140,19 +140,27 @@
     }
 
     .right.bottom.T8 {
+      top: 30cqw;
       right: 6cqw;
+      transform: rotate(45deg);
     }
 
     .right.top.T8 {
+      top: 5cqw;
       right: 6cqw;
+      transform: rotate(-45deg);
     }
 
     .left.top.T8 {
+      top: 5cqw;
       left: 6cqw;
+      transform: rotate(45deg);
     }
 
     .left.bottom.T8 {
+      top: 30cqw;
       left: 6cqw;
+      transform: rotate(-45deg);
     }
   }
 
