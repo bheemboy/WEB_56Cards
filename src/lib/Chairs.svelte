@@ -66,100 +66,79 @@
 <style>
   .chair-box {
     position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    gap: min(1cqw, 1cqh);
+    place-items: center;
     z-index: 1;
   }
 
-  .chair-box.vertical.left {
-    transform-origin: left bottom ;
-    transform: rotate(90deg);
-  }
-
-  .chair-box.vertical.right {
-    transform-origin: right bottom ;
-    transform: rotate(-90deg);
-  }
-
-  .chair-box.right.bottom {
-    top: 58cqh;
+  .chair-box.top {
+    top: 0cqh;
+    grid-template-areas:
+      "N"
+      "D";
   }
 
   .chair-box.right {
-    top: 38cqh;
+    top: 42cqh;
     right: 0cqw;
+    grid-template-areas:
+      "D N";
+  }
+
+  .chair-box.right.bottom {
+    top: 62cqh;
   }
 
   .chair-box.right.top {
-    top: 18cqh;
-  }
-
-  .chair-box.top {
-    top: min(50px, min(13cqw, 13cqh));
-  }
-
-  .chair-box.left.top {
-    top: 18cqh;
+    top: 22cqh;
   }
 
   .chair-box.left {
+    top: 42cqh;
     left: 0cqw;
-    top: 38cqh;
+    grid-template-areas:
+      "N D";
   }
 
   .chair-box.left.bottom {
-    top: 58cqh;
+    top: 62cqh;
+  }
+
+  .chair-box.left.top {
+    top: 22cqh;
   }
 
   .chair-box.bottom:not(.left):not(.right) {
     bottom: 0cqh;
+    grid-template-areas:
+      "D"
+      "N";
   }
 
-  @container cards-table (orientation: landscape) and (height < 450px) {
+  @container cards-table (width < 450px) {
     .chair-box.vertical.left {
-      transform-origin: middle middle;
-      transform: rotate(0deg);
+      transform-origin: left bottom ;
+      transform: translateY(-5cqh) rotate(90deg);
+      grid-template-areas:
+        "D N";
     }
 
     .chair-box.vertical.right {
-      transform-origin: middle middle;
-      transform: rotate(0deg);
+      transform-origin: right bottom ;
+      transform: translateY(-5cqh) rotate(-90deg);
+      grid-template-areas:
+        "N D";
     }
 
     .chair-box.top {
-      top: 0cqh;
-    }
-
-    .chair-box.right {
-      top: 42cqh;
-      right: 0cqw;
-    }
-
-    .chair-box.right.bottom {
-      top: 62cqh;
-    }
-
-    .chair-box.right.top {
-      top: 22cqh;
-    }
-
-    .chair-box.left {
-      top: 42cqh;
-      left: 0cqw;
-    }
-
-    .chair-box.left.bottom {
-      top: 62cqh;
-    }
-
-    .chair-box.left.top {
-      top: 22cqh;
+      top: min(50px, min(13cqw, 13cqh));
     }
   }
 
   .player-name-box {
     position: relative;
+    grid-area: N;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,6 +160,7 @@
 
   .dealer {
     position: relative;
+    grid-area: D;
     width: 1rem;
     aspect-ratio: 1;
     background-size: contain;

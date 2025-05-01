@@ -124,7 +124,7 @@
 
   @container cards-table (orientation: landscape) and (height < 450px) {
     .card-container {
-      height: 60cqh;
+      height: 55cqh;
       top: 15cqh;
     }
   }

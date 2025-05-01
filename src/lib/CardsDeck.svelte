@@ -89,6 +89,7 @@
   }
   @container cards-table (orientation: landscape) and (height < 450px) {
     .deck-container {
+      bottom: 45px;
       height: 13cqh;
     }
   }
