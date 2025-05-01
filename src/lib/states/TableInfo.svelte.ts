@@ -7,7 +7,6 @@
 // Define proper interfaces for better type safety
 export interface TableInfoData {
   Type?: number;
-  MaxPlayers?: number;
   TableName?: string;
   TableFull?: boolean;
 }
@@ -18,34 +17,59 @@ export interface GameState {
   [key: string]: any;
 }
 
+// Define valid table types and their corresponding player counts
+export type TableType = 0 | 1 | 2;
+export type PlayerCount = 4 | 6 | 8;
+
 export class TableInfo {
   // Using readonly for immutability
-  private readonly _type: number;
-  private readonly _maxPlayers: number;
+  private readonly _type: TableType;
   private readonly _tableName: string;
   private readonly _tableFull: boolean;
 
   /**
    * Private constructor - use factory methods to create instances
    */
-  private constructor(
-    type: number = 0,
-    maxPlayers: number = 0,
-    tableName: string = '',
-    tableFull: boolean = false
-  ) {
+  private constructor(type: TableType = 0, tableName: string = "", tableFull: boolean = false) {
     this._type = type;
-    this._maxPlayers = maxPlayers;
     this._tableName = tableName;
     this._tableFull = tableFull;
   }
 
   // Getters that don't trigger reactive updates on read
-  public get type(): number { return this._type; }
-  public get maxPlayers(): number { return this._maxPlayers; }
-  public get tableName(): string { return this._tableName; }
-  public get tableFull(): boolean { return this._tableFull; }
-  
+  public get type(): TableType {
+    return this._type;
+  }
+
+  /**
+   * Derives maxPlayers from type:
+   * - type 0 → 4 players
+   * - type 1 → 6 players
+   * - type 2 → 8 players
+   */
+  public get maxPlayers(): PlayerCount {
+    switch (this._type) {
+      case 0:
+        return 4;
+      case 1:
+        return 6;
+      case 2:
+        return 8;
+      default:
+        // This shouldn't happen with proper TypeScript, but for safety:
+        console.warn(`Invalid table type: ${this._type}, defaulting to 4 players`);
+        return 4;
+    }
+  }
+
+  public get tableName(): string {
+    return this._tableName;
+  }
+
+  public get tableFull(): boolean {
+    return this._tableFull;
+  }
+
   /**
    * Factory method to create a default TableInfo instance
    */
@@ -62,33 +86,28 @@ export class TableInfo {
    */
   public static update(table: TableInfo | undefined, gameState: GameState): [TableInfo, boolean] {
     if (!gameState) {
-      throw new Error('Invalid game state provided');
+      throw new Error("Invalid game state provided");
     }
 
     try {
       // Extract TableInfo data safely handling potential undefined values
       const tableInfo: TableInfoData = gameState.TableInfo || gameState;
-      
+
+      // Ensure type is valid (0, 1, or 2)
+      const rawType = typeof tableInfo.Type === "number" ? tableInfo.Type : 0;
+      const safeType = rawType >= 0 && rawType <= 2 ? (rawType as TableType) : 0;
+
       // Create a new TableInfo object with extracted values
-      const newTable = new TableInfo(
-        typeof tableInfo.Type === 'number' ? tableInfo.Type : 0,
-        typeof tableInfo.MaxPlayers === 'number' ? tableInfo.MaxPlayers : 0,
-        typeof tableInfo.TableName === 'string' ? tableInfo.TableName : '',
-        !!gameState.TableFull
-      );
+      const newTable = new TableInfo(safeType, typeof tableInfo.TableName === "string" ? tableInfo.TableName : "", !!gameState.TableFull);
 
       // Compare with existing table if available
-      if (table && 
-          table._type === newTable._type &&
-          table._maxPlayers === newTable._maxPlayers &&
-          table._tableName === newTable._tableName &&
-          table._tableFull === newTable._tableFull) {
+      if (table && table._type === newTable._type && table._tableName === newTable._tableName && table._tableFull === newTable._tableFull) {
         return [table, false]; // No changes, return existing table
       }
-      
+
       return [newTable, true]; // Changes detected, return new table
     } catch (error) {
-      console.error('Error updating TableInfo:', error);
+      console.error("Error updating TableInfo:", error);
       return [table || new TableInfo(), false]; // Return existing or new table on error
     }
   }
@@ -97,16 +116,14 @@ export class TableInfo {
    * Creates a plain object representation of the TableInfo
    */
   public toJSON(): {
-    type: number;
-    maxPlayers: number;
+    type: TableType;
     tableName: string;
     tableFull: boolean;
   } {
     return {
       type: this._type,
-      maxPlayers: this._maxPlayers,
       tableName: this._tableName,
-      tableFull: this._tableFull
+      tableFull: this._tableFull,
     };
   }
 }
