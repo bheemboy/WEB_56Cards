@@ -3,48 +3,48 @@
   import { getContext } from "svelte";
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import type { Chair } from "./states/Chairs.svelte";
+  import LastBid from "./LastBid.svelte";
 
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
 
-  const positionClasses = {
-    4: {
-      // 4-player game positions
-      0: "bottom",
-      1: "right vertical",
-      2: "top",
-      3: "left vertical",
-    },
-    6: {
-      // 6-player game positions
-      0: "bottom",
-      1: "right bottom vertical",
-      2: "right top vertical",
-      3: "top",
-      4: "left top vertical",
-      5: "left bottom vertical",
-    },
-    8: {
-      // 8-player game positions
-      0: "bottom",
-      1: "right bottom vertical",
-      2: "right vertical",
-      3: "right top vertical",
-      4: "top",
-      5: "left top vertical",
-      6: "left vertical",
-      7: "left bottom vertical",
-    },
-  };
+  const positionClassMap = new Map([
+    ["4-0", "bottom"],
+    ["4-1", "right vertical"],
+    ["4-2", "top"],
+    ["4-3", "left vertical"],
+    ["6-0", "bottom"],
+    ["6-1", "right bottom vertical"],
+    ["6-2", "right top vertical"],
+    ["6-3", "top"],
+    ["6-4", "left top vertical"],
+    ["6-5", "left bottom vertical"],
+    ["8-0", "bottom"],
+    ["8-1", "right bottom vertical"],
+    ["8-2", "right vertical"],
+    ["8-3", "right top vertical"],
+    ["8-4", "top"],
+    ["8-5", "left top vertical"],
+    ["8-6", "left vertical"],
+    ["8-7", "left bottom vertical"],
+  ]);
 
-  // Function to determine chair position class
-  function getPositionClasses(chair: Chair): string {
-    const mapping = positionClasses[game.tableInfo.maxPlayers as 4 | 6 | 8];
-    const relativePosn = (chair.Position - game.currentPlayer.playerPosition + game.tableInfo.maxPlayers) % game.tableInfo.maxPlayers;
-    return mapping[relativePosn as keyof typeof mapping];
+  const chairs = $derived(game.chairs.getAllChairs());
+  
+  // Determine relative position
+  function getRelativePosition(chairPosition: number): number {
+    const { maxPlayers } = game.tableInfo;
+    return (chairPosition - game.currentPlayer.playerPosition + maxPlayers) % maxPlayers;
   }
 
-  // Function to determine team color based on position
+  // Determine chair position class
+  function getPositionClasses(chair: Chair): string {
+    const { maxPlayers } = game.tableInfo;
+    const relativePos = getRelativePosition(chair.Position);
+    return positionClassMap.get(`${maxPlayers}-${relativePos}`) || "";
+  }
+
+  // Determine team color based on position
   function getTeamClass(chair: Chair): string {
     return chair.Position % 2 === 0 ? "team-blue" : "team-red";
   }
@@ -54,11 +54,12 @@
   }
 </script>
 
-{#each game.chairs.getAllChairs() as chair}
+{#each chairs as chair (chair.Position)}
   <div class={`chair-box ${getChairClasses(chair)}`}>
     <div class="dealer"></div>
-    <div class={`player-name-box ${getChairClasses(chair)}`}>
-      <span class={`player-name ${getChairClasses(chair)}`}>{chair.Occupant?.Name ?? ""}</span>
+    <div class="last-bid"><LastBid {chair}/></div>
+    <div class="player-name-box">
+      <span class="player-name">{chair.Occupant?.Name || ""}</span>
     </div>
   </div>
 {/each}
@@ -67,7 +68,6 @@
   .chair-box {
     position: absolute;
     display: grid;
-    gap: min(1cqw, 1cqh);
     place-items: center;
     z-index: 1;
   }
@@ -75,60 +75,59 @@
   .chair-box.top {
     top: 0cqh;
     grid-template-areas:
-      "N"
-      "D";
+      "N N"
+      "D B";
+  }
+
+  .chair-box.bottom {
+    bottom: 0cqh;
+    grid-template-areas:
+      "D B"
+      "N N";
   }
 
   .chair-box.right {
-    top: 42cqh;
     right: 0cqw;
     grid-template-areas:
-      "D N";
-  }
-
-  .chair-box.right.bottom {
-    top: 62cqh;
-  }
-
-  .chair-box.right.top {
-    top: 22cqh;
+      "D B"
+      "N N";
   }
 
   .chair-box.left {
-    top: 42cqh;
     left: 0cqw;
     grid-template-areas:
-      "N D";
+      "D B"
+      "N N";
   }
 
-  .chair-box.left.bottom {
+  /* Position adjustments */
+  .chair-box.right, .chair-box.left {
+    top: 42cqh;
+  }
+
+  .chair-box.right.bottom, .chair-box.left.bottom {
     top: 62cqh;
+    bottom: auto; /* override value set in .chair-box.bottom */
   }
 
-  .chair-box.left.top {
+  .chair-box.right.top, .chair-box.left.top {
     top: 22cqh;
   }
 
-  .chair-box.bottom:not(.left):not(.right) {
-    bottom: 0cqh;
-    grid-template-areas:
-      "D"
-      "N";
-  }
 
   @container cards-table (width < 450px) {
     .chair-box.vertical.left {
       transform-origin: left bottom ;
       transform: translateY(-5cqh) rotate(90deg);
       grid-template-areas:
-        "D N";
+        "D N B";
     }
 
     .chair-box.vertical.right {
       transform-origin: right bottom ;
       transform: translateY(-5cqh) rotate(-90deg);
       grid-template-areas:
-        "N D";
+        "B N D";
     }
 
     .chair-box.top {
@@ -142,7 +141,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: max(80px, 10cqw);
+    width: clamp(80px, 10cqw, 150px);
     height: 25px;
     border-radius: 10px;
     overflow: hidden;
@@ -156,6 +155,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 8px;
+    width: 100%;
+    text-align: center;
   }
 
   .dealer {
@@ -167,5 +168,9 @@
     background-repeat: no-repeat;
     background-position: center;
     background-image: url("/images/star.svg");
+  }
+
+  .last-bid {
+    grid-area: B;
   }
 </style>
