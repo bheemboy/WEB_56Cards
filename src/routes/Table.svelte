@@ -1,10 +1,7 @@
 <!-- Table.svelte -->
 <script lang="ts">
   import { getContext, onMount } from "svelte";
-  import {
-    GameController,
-    gameControllerContextKey,
-  } from "../lib/GameController.svelte";
+  import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import { ConnectionState } from "../lib/HubConnection.svelte";
   import CardsDeck from "../lib/CardsDeck.svelte";
   import Coolies from "../lib/Coolies.svelte";
@@ -57,11 +54,7 @@
 
     <Chairs />
 
-    <CurrentRoundCards
-      currentRound={gameController.roundsInfo.currentRound}
-      currentPlayerPosition={gameController.currentPlayer.playerPosition}
-      maxPlayers={gameController.tableInfo.maxPlayers}
-    />
+    <CurrentRoundCards />
 
     <CardsDeck cards={gameController.currentPlayer.playerCards} />
   </div>

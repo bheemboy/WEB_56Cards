@@ -1,28 +1,18 @@
 <!-- CurrentRoundCards.svelte -->
 <script lang="ts">
-  import { type Round } from "./states/Rounds.svelte";
-  import Card from "./Card.svelte";
-  import { type CardProps } from "./Card.svelte";
-  import {
-    cardHeightContextKey,
-    type CardHeightContext,
-  } from "./CardHeight.svelte";
   import { getContext } from "svelte";
+  import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
+  import { cardHeightContextKey, type CardHeightContext } from "./CardHeight.svelte";
+  import Card from "./Card.svelte";
 
-  export interface CurrentRoundCardsProps {
-    currentRound: Round;
-    currentPlayerPosition: number;
-    maxPlayers: number;
-  }
-  let {
-    currentRound,
-    currentPlayerPosition,
-    maxPlayers,
-  }: CurrentRoundCardsProps = $props();
+  // Get the hub instance from the context
+  const game: GameController = getContext(gameControllerContextKey);
+  const firstPlayer = $derived(game.roundsInfo.currentRound.FirstPlayer);
+  const currentPlayerPosition = $derived(game.currentPlayer.playerPosition);
+  const maxPlayers = $derived(game.tableInfo.maxPlayers);
+  const playedCards = $derived(game.roundsInfo.currentRound.PlayedCards);
 
-  let deckCardHeightContext: CardHeightContext = $state(
-    getContext(cardHeightContextKey),
-  );
+  let deckCardHeightContext: CardHeightContext = $state(getContext(cardHeightContextKey));
   let gridCellHeight: number = $state(0);
 
   const positionClasses = {
@@ -58,26 +48,15 @@
   // Function to determine chair position class
   function getPositionClass(index: number): string {
     const mapping = positionClasses[maxPlayers as 4 | 6 | 8];
-    const relativePosn =
-      (currentRound.FirstPlayer + index - currentPlayerPosition + maxPlayers) %
-      maxPlayers;
+    const relativePosn = (firstPlayer + index - currentPlayerPosition + maxPlayers) % maxPlayers;
     return mapping[relativePosn as keyof typeof mapping];
   }
 </script>
 
 <div class={`card-container p${maxPlayers}`}>
-  {#each currentRound.PlayedCards as card, index}
-    <div
-      class={`card ${getPositionClass(index)}`}
-      bind:clientHeight={gridCellHeight}
-    >
-      <Card
-        {card}
-        height={Math.min(gridCellHeight, deckCardHeightContext.h) + "px"}
-        showfullcard={true}
-        rotation={0}
-        translation={0}
-      />
+  {#each playedCards as card, index}
+    <div class={`card ${getPositionClass(index)}`} bind:clientHeight={gridCellHeight}>
+      <Card {card} height={Math.min(gridCellHeight, deckCardHeightContext.h) + "px"} showfullcard={true} rotation={0} translation={0} />
     </div>
   {/each}
 </div>
