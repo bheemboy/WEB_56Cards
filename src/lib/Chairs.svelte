@@ -1,10 +1,7 @@
 <!-- Chair.svelte -->
 <script lang="ts">
   import { getContext } from "svelte";
-  import {
-    GameController,
-    gameControllerContextKey,
-  } from "../lib/GameController.svelte";
+  import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import type { Chair } from "./states/Chairs.svelte";
 
   // Get the hub instance from the context
@@ -43,11 +40,7 @@
   // Function to determine chair position class
   function getPositionClasses(chair: Chair): string {
     const mapping = positionClasses[game.tableInfo.maxPlayers as 4 | 6 | 8];
-    const relativePosn =
-      (chair.Position -
-        game.currentPlayer.playerPosition +
-        game.tableInfo.maxPlayers) %
-      game.tableInfo.maxPlayers;
+    const relativePosn = (chair.Position - game.currentPlayer.playerPosition + game.tableInfo.maxPlayers) % game.tableInfo.maxPlayers;
     return mapping[relativePosn as keyof typeof mapping];
   }
 
@@ -55,113 +48,128 @@
   function getTeamClass(chair: Chair): string {
     return chair.Position % 2 === 0 ? "team-blue" : "team-red";
   }
+
+  function getChairClasses(chair: Chair): string {
+    return `T${game.tableInfo.maxPlayers} ${getPositionClasses(chair)} ${getTeamClass(chair)}`;
+  }
 </script>
 
 {#each game.chairs.getAllChairs() as chair}
-  <div
-    class={`player-box ${getPositionClasses(chair)} ${getTeamClass(chair)} T${game.tableInfo.maxPlayers}`}
-  >
-    <span class="player-name">{chair.Occupant?.Name ?? ""}</span>
+  <div class={`chair-box ${getChairClasses(chair)}`}>
+    <div class="dealer"></div>
+    <div class={`player-name-box ${getChairClasses(chair)}`}>
+      <span class={`player-name ${getChairClasses(chair)}`}>{chair.Occupant?.Name ?? ""}</span>
+    </div>
   </div>
 {/each}
 
 <style>
-  .player-box {
+  .chair-box {
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 255, 0.3);
-    border: 1px solid rgba(0, 0, 255, 0.5);
-    border-radius: 10px;
-    overflow: hidden;
-    box-sizing: border-box;
-    height: 40px;
-    width: max(130px, 12cqw);
     z-index: 1;
   }
 
-  .team-red {
-    background-color: rgba(255, 0, 0, 0.4);
-    border: 1px solid rgba(255, 0, 0, 0.5);
+  .chair-box.vertical.left {
+    transform-origin: left bottom ;
+    transform: rotate(90deg);
   }
 
-  .vertical {
-    height: max(130px, 12cqw);
-    width: 40px;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
+  .chair-box.vertical.right {
+    transform-origin: right bottom ;
+    transform: rotate(-90deg);
   }
 
-  .right.bottom {
-    top: 60cqh;
+  .chair-box.right.bottom {
+    top: 58cqh;
   }
 
-  .right {
-    right: 0cqw;
+  .chair-box.right {
     top: 38cqh;
+    right: 0cqw;
   }
 
-  .right.top {
-    top: 16cqh;
+  .chair-box.right.top {
+    top: 18cqh;
   }
 
-  .top {
+  .chair-box.top {
     top: min(50px, min(13cqw, 13cqh));
   }
 
-  .left.top {
-    top: 16cqh;
+  .chair-box.left.top {
+    top: 18cqh;
   }
 
-  .left {
+  .chair-box.left {
     left: 0cqw;
     top: 38cqh;
   }
 
-  .left.bottom {
-    top: 60cqh;
+  .chair-box.left.bottom {
+    top: 58cqh;
   }
 
-  .player-box.bottom:not(.left):not(.right) {
+  .chair-box.bottom:not(.left):not(.right) {
     bottom: 0cqh;
-    height: 25px;
-    width: max(130px, 12cqw);
   }
 
   @container cards-table (orientation: landscape) and (height < 450px) {
-    .vertical.T8 {
-      height: max(100px, 12cqw);
+    .chair-box.vertical.left {
+      transform-origin: middle middle;
+      transform: rotate(0deg);
     }
 
-    .top {
+    .chair-box.vertical.right {
+      transform-origin: middle middle;
+      transform: rotate(0deg);
+    }
+
+    .chair-box.top {
       top: 0cqh;
     }
 
-    .right.bottom.T8 {
-      top: 30cqw;
-      right: 6cqw;
-      transform: rotate(45deg);
+    .chair-box.right {
+      top: 42cqh;
+      right: 0cqw;
     }
 
-    .right.top.T8 {
-      top: 5cqw;
-      right: 6cqw;
-      transform: rotate(-45deg);
+    .chair-box.right.bottom {
+      top: 62cqh;
     }
 
-    .left.top.T8 {
-      top: 5cqw;
-      left: 6cqw;
-      transform: rotate(45deg);
+    .chair-box.right.top {
+      top: 22cqh;
     }
 
-    .left.bottom.T8 {
-      top: 30cqw;
-      left: 6cqw;
-      transform: rotate(-45deg);
+    .chair-box.left {
+      top: 42cqh;
+      left: 0cqw;
     }
+
+    .chair-box.left.bottom {
+      top: 62cqh;
+    }
+
+    .chair-box.left.top {
+      top: 22cqh;
+    }
+  }
+
+  .player-name-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max(80px, 10cqw);
+    height: 25px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 255, 0.3);
+    border: 1px solid rgba(0, 0, 255, 0.5);
   }
 
   .player-name {
@@ -169,7 +177,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 8px;
-    max-width: 100%;
-    max-height: 100%;
+  }
+
+  .dealer {
+    position: relative;
+    width: 1rem;
+    aspect-ratio: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/star.svg");
   }
 </style>
