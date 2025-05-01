@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getContext } from "svelte";
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
+  import { GameStage } from "./states/GameInfo.svelte";
 
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
@@ -32,7 +33,7 @@
   });
 </script>
 
-<div class="score-container">
+<div class="score-container" style:display={game.gameInfo.gameStage > GameStage.Bidding ? 'block' : 'none'}>
   <div class={`team-score left team${game.currentPlayer.homeTeam}`} style:width="{homeWidth}%">
     <span class="score-text">{homeTeamScore}</span>
   </div>

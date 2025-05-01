@@ -56,9 +56,11 @@
 
 {#each chairs as chair (chair.Position)}
   <div class={`chair-box ${getChairClasses(chair)}`}>
-    <div class="dealer"></div>
+    {#if chair.Position === game.gameInfo.dealerPos}
+      <div class="dealer"></div>
+    {/if}
     <div class="last-bid"><LastBid {chair}/></div>
-    <div class="player-name-box">
+    <div class={`player-name-box ${getChairClasses(chair)}`}>
       <span class="player-name">{chair.Occupant?.Name || ""}</span>
     </div>
   </div>
@@ -82,22 +84,21 @@
   .chair-box.bottom {
     bottom: 0cqh;
     grid-template-areas:
-      "D B"
-      "N N";
+      "D N B";
   }
 
   .chair-box.right {
     right: 0cqw;
     grid-template-areas:
-      "D B"
-      "N N";
+      "D N"
+      "B N";
   }
 
   .chair-box.left {
     left: 0cqw;
     grid-template-areas:
-      "D B"
-      "N N";
+      "N D"
+      "N B";
   }
 
   /* Position adjustments */
@@ -148,6 +149,11 @@
     box-sizing: border-box;
     background-color: rgba(0, 0, 255, 0.3);
     border: 1px solid rgba(0, 0, 255, 0.5);
+  }
+
+  .player-name-box.team-red {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 1px solid rgba(255, 0, 0, 0.5);
   }
 
   .player-name {

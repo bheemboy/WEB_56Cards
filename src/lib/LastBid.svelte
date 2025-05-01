@@ -28,7 +28,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 25px;
+    height: 23px;
     border-radius: 5px;
     overflow: hidden;
     box-sizing: border-box;
@@ -36,8 +36,8 @@
   }
 
   .last-bid-box.high-bidder {
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 0, 0.7);
+    background-color: rgba(255, 255, 255, 0.3);
+    /* border: 1px solid rgba(255, 255, 0, 0.7); */
     color: rgba(250, 250, 210, 1);
   }
 
@@ -45,7 +45,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 3px;
+    padding: 3px;
     width: 100%;
     text-align: center;
   }
