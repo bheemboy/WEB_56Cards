@@ -170,6 +170,7 @@
   }
 
   .player-name {
+    color: rgba(255, 255, 255, 0.87);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
