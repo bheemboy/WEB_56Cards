@@ -4,6 +4,7 @@
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import type { Chair } from "./states/Chairs.svelte";
   import LastBid from "./LastBid.svelte";
+  import { GameStage } from "./states/GameInfo.svelte";
 
   // Get the hub instance from the context
   const game: GameController = getContext(gameControllerContextKey);
@@ -30,7 +31,7 @@
   ]);
 
   const chairs = $derived(game.chairs.getAllChairs());
-  
+
   // Determine relative position
   function getRelativePosition(chairPosition: number): number {
     const { maxPlayers } = game.tableInfo;
@@ -44,13 +45,25 @@
     return positionClassMap.get(`${maxPlayers}-${relativePos}`) || "";
   }
 
+  // Determine if it is position's turn
+  function getBlink(chair: Chair): string {
+    let isChairTurnToPlay: boolean = false;
+    if (game.gameInfo.gameStage === GameStage.Bidding || game.gameInfo.gameStage === GameStage.SelectingTrump) {
+      isChairTurnToPlay = chair.Position === game.bidInfo.nextBidder;
+    } else if (game.gameInfo.gameStage === GameStage.PlayingCards) {
+      isChairTurnToPlay = chair.Position === game.roundsInfo.currentRound.NextPlayer;
+    }
+
+    return isChairTurnToPlay ? "blink" : "";
+  }
+
   // Determine team color based on position
   function getTeamClass(chair: Chair): string {
     return chair.Position % 2 === 0 ? "team-blue" : "team-red";
   }
 
   function getChairClasses(chair: Chair): string {
-    return `T${game.tableInfo.maxPlayers} ${getPositionClasses(chair)} ${getTeamClass(chair)}`;
+    return `T${game.tableInfo.maxPlayers} ${getPositionClasses(chair)} ${getTeamClass(chair)} ${getBlink(chair)}`;
   }
 </script>
 
@@ -102,33 +115,33 @@
   }
 
   /* Position adjustments */
-  .chair-box.right, .chair-box.left {
+  .chair-box.right,
+  .chair-box.left {
     top: 42cqh;
   }
 
-  .chair-box.right.bottom, .chair-box.left.bottom {
+  .chair-box.right.bottom,
+  .chair-box.left.bottom {
     top: 62cqh;
     bottom: auto; /* override value set in .chair-box.bottom */
   }
 
-  .chair-box.right.top, .chair-box.left.top {
+  .chair-box.right.top,
+  .chair-box.left.top {
     top: 22cqh;
   }
 
-
   @container cards-table (width < 450px) {
     .chair-box.vertical.left {
-      transform-origin: left bottom ;
+      transform-origin: left bottom;
       transform: translateY(-5cqh) rotate(90deg);
-      grid-template-areas:
-        "D N B";
+      grid-template-areas: "D N B";
     }
 
     .chair-box.vertical.right {
-      transform-origin: right bottom ;
+      transform-origin: right bottom;
       transform: translateY(-5cqh) rotate(-90deg);
-      grid-template-areas:
-        "B N D";
+      grid-template-areas: "B N D";
     }
 
     .chair-box.top {
@@ -163,6 +176,36 @@
     padding: 0 8px;
     width: 100%;
     text-align: center;
+  }
+
+  .player-name-box.blink.team-blue {
+    border-radius: 10px;
+    animation: blinking-blue 1s infinite;
+  }
+
+  .player-name-box.blink.team-red {
+    border-radius: 10px;
+    animation: blinking-red 1s infinite;
+  }
+
+  @keyframes blinking-blue {
+    0% {
+      background-color: aqua;
+    }
+
+    100% {
+      background-color: rgba(0, 0, 255, 0.3);
+    }
+  }
+
+  @keyframes blinking-red {
+    0% {
+      background-color: orangered;
+    }
+
+    100% {
+      background-color: rgba(255, 0, 0, 0.3);
+    }
   }
 
   .dealer {
