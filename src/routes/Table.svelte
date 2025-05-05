@@ -7,6 +7,7 @@
   import Coolies from "../lib/Coolies.svelte";
   import Chairs from "../lib/Chairs.svelte";
   import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
+  import ActionButtons from "../lib/ActionButtons.svelte";
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
@@ -51,6 +52,8 @@
 <div class="table-container">
   <div class="table">
     <Coolies />
+
+    <ActionButtons />
 
     <Chairs />
 
