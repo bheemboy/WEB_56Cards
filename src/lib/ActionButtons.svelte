@@ -2,6 +2,7 @@
   import { getContext } from "svelte";
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import { GameStage } from "./states/GameInfo.svelte";
+  import Confirmation from "./Confirmation.svelte";
 
   const game: GameController = getContext(gameControllerContextKey);
 
@@ -9,15 +10,23 @@
     game.startNextGame();
   }
 
-  function handleForfeitGame() {
-    if (confirm('Forfeit this game?')) {
+  let showConfirmation = $state(false);
+  let confirmationResponse = $state(false);
+
+  function confirmForfeitGame() {
+    showConfirmation = true;
+  }
+
+  function forfeitGame(event: { confirmed: boolean }): void {
+    if (event.confirmed) {
       game.forfeitGame();
     }
+    showConfirmation = false;
   }
 
   function handleLogout() {
     game.unregiterPlayer();
-    window.location.href = '/';
+    window.location.href = "/";
   }
 
   function handleViewLastRound() {
@@ -56,7 +65,7 @@
 
   {#if game.gameInfo.gameStage === GameStage.PlayingCards}
     <div class="button-container">
-      <button class="game-button forfeitgame" onclick={handleForfeitGame}>
+      <button class="game-button forfeitgame" onclick={confirmForfeitGame}>
         <!-- Forfeit Game SVG -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path fill="none" d="M8.5 8.5l7 7M15.5 8.5l-7 7" />
@@ -64,6 +73,17 @@
         </svg>
       </button>
     </div>
+  {/if}
+
+  {#if showConfirmation}
+    <Confirmation
+      title="Forfeit Game?"
+      message="Are you sure you want to forfeit this game?"
+      yesText="Yes"
+      noText="No"
+      bind:response={confirmationResponse}
+      onclose={forfeitGame}
+    />
   {/if}
 
   <div class="button-container">
@@ -124,23 +144,23 @@
   /* Custom strokes */
   .newgame svg path {
     stroke: rgb(161, 255, 247);
-    stroke-width: 1.5; 
+    stroke-width: 1.5;
   }
 
   .viewlastround svg path,
   .viewlastround svg circle {
     stroke: rgb(255, 237, 133);
-    stroke-width: 1.5; 
+    stroke-width: 1.5;
   }
 
   .forfeitgame svg path,
   .forfeitgame svg circle {
     stroke: rgb(253, 130, 146);
-    stroke-width: 2; 
+    stroke-width: 2;
   }
 
   .logout svg path {
     stroke: white;
-    stroke-width: 1.5; 
+    stroke-width: 1.5;
   }
 </style>

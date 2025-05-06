@@ -8,6 +8,13 @@
   const TOTALPOINTS = 56;
 
   // Calculate percentages for the widths (memoized with $derived)
+  const showScores = $derived.by(() => {
+    const isActiveGameplay = game.gameInfo.gameStage === GameStage.PlayingCards;
+    const isGameCompletedNormally = game.gameInfo.gameStage === GameStage.GameOver && !game.gameInfo.gameCancelled && !game.gameInfo.gameForfeited;
+    return (isActiveGameplay || isGameCompletedNormally) ? "block": "none";
+  });
+
+  
   const homeWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.homeTeam]) / TOTALPOINTS);
   const otherWidth = $derived((100.0 * game.roundsInfo.teamScore[game.currentPlayer.otherTeam]) / TOTALPOINTS);
   const homeTeamScore: string = $derived(
@@ -33,7 +40,7 @@
   });
 </script>
 
-<div class="score-container" style:display={game.gameInfo.gameStage > GameStage.Bidding ? 'block' : 'none'}>
+<div class="score-container" style:display={showScores}>
   <div class={`team-score left team${game.currentPlayer.homeTeam}`} style:width="{homeWidth}%">
     <span class="score-text">{homeTeamScore}</span>
   </div>
