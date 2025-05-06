@@ -4,12 +4,31 @@
   import { GameStage } from "./states/GameInfo.svelte";
 
   const game: GameController = getContext(gameControllerContextKey);
+
+  function handleNewGame() {
+    game.startNextGame();
+  }
+
+  function handleForfeitGame() {
+    if (confirm('Forfeit this game?')) {
+      game.forfeitGame();
+    }
+  }
+
+  function handleLogout() {
+    game.unregiterPlayer();
+    window.location.href = '/';
+  }
+
+  function handleViewLastRound() {
+    // TODO
+  }
 </script>
 
 <div class="button-bar">
   {#if game.gameInfo.gameStage === GameStage.GameOver}
     <div class="button-container">
-      <button class="game-button newgame">
+      <button class="game-button newgame" onclick={handleNewGame}>
         <!-- New Game SVG -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path fill="none" d="M15 14.5H8M11.5 11v7M18.5 21.5h-14v-19h9l5 5v14z" />
@@ -21,7 +40,7 @@
 
   {#if game.roundsInfo.rounds.length > 1 && game.gameInfo.gameStage === GameStage.PlayingCards}
     <div class="button-container">
-      <button class="game-button viewlastround">
+      <button class="game-button viewlastround" onclick={handleViewLastRound}>
         <!-- View Last Round SVG -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path fill="none" d="M11.54 6.54v4h4" />
@@ -37,7 +56,7 @@
 
   {#if game.gameInfo.gameStage === GameStage.PlayingCards}
     <div class="button-container">
-      <button class="game-button forfeitgame">
+      <button class="game-button forfeitgame" onclick={handleForfeitGame}>
         <!-- Forfeit Game SVG -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path fill="none" d="M8.5 8.5l7 7M15.5 8.5l-7 7" />
@@ -48,7 +67,7 @@
   {/if}
 
   <div class="button-container">
-    <button class="game-button logout">
+    <button class="game-button logout" onclick={handleLogout}>
       <!-- Logout SVG -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path fill="none" d="M10.5 11V2.5h10v19h-10V14M3.5 12.5H16M7 9l-3.5 3.5L7 16" />
@@ -65,7 +84,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: max(0.75cqh, 0.75cqw);
+    gap: max(1cqh, 1cqw);
     font-family: sans-serif;
   }
 
