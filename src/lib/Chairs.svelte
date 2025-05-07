@@ -131,7 +131,7 @@
     top: 22cqh;
   }
 
-  @container cards-table (width < 500px) {
+  @container cards-table (width < 550px) {
     .chair-box.vertical.left {
       transform-origin: left bottom;
       transform: translateY(-5cqh) rotate(90deg);
