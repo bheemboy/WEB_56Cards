@@ -32,11 +32,15 @@ export interface TableInfoData {
   readonly CoolieCount?: number[];
   readonly TeamScore?: number[];
   readonly Bid?: BidInfo;
+  readonly TrumpExposed?: boolean;
+  readonly TrumpCard?: string;
 }
 
 export interface GameState {
   readonly GameStage?: number;
   readonly TableInfo?: TableInfoData;
+  readonly TrumpExposed?: boolean;
+  readonly TrumpCard?: string;
 }
 
 export class GameInfo {
@@ -47,6 +51,8 @@ export class GameInfo {
   private readonly _dealerPos: number;
   private readonly _coolieCount: ReadonlyArray<number>;
   private readonly _teams: ReadonlyArray<TeamInfo>;
+  private readonly _trumpExposed: boolean;
+  private readonly _trumpCard: string;
 
   /**
    * Private constructor - use factory methods to create instances
@@ -60,17 +66,20 @@ export class GameInfo {
     teams: TeamInfo[] = [
       { currentScore: 0, scoreNeeded: 0, coolieCount: 0 },
       { currentScore: 0, scoreNeeded: 0, coolieCount: 0 }
-    ]
+    ],
+    trumpExposed: boolean = false,
+    trumpCard: string = ''
   ) {
     this._gameStage = gameStage;
     this._gameCancelled = gameCancelled;
     this._gameForfeited = gameForfeited;
     this._dealerPos = dealerPos;
-    // Create defensive copies of arrays
     this._coolieCount = Object.freeze([...coolieCount]);
     this._teams = Object.freeze(
       teams.map(team => Object.freeze({ ...team }))
     );
+    this._trumpExposed = trumpExposed;
+    this._trumpCard = trumpCard;
   }
 
   // Getters with proper return types
@@ -96,6 +105,14 @@ export class GameInfo {
 
   public get teams(): ReadonlyArray<TeamInfo> {
     return this._teams;
+  }
+
+  public get trumpExposed(): boolean {
+    return this._trumpExposed;
+  }
+
+  public get trumpCard(): string {
+    return this._trumpCard;
   }
 
   /**
@@ -139,6 +156,8 @@ export class GameInfo {
       a._gameCancelled === b._gameCancelled &&
       a._gameForfeited === b._gameForfeited &&
       a._dealerPos === b._dealerPos &&
+      a._trumpExposed === b._trumpExposed &&
+      a._trumpCard === b._trumpCard &&
       a._coolieCount.length === b._coolieCount.length &&
       a._coolieCount.every((val, i) => val === b._coolieCount[i]) &&
       a._teams.length === b._teams.length &&
@@ -209,6 +228,13 @@ export class GameInfo {
         }
       ];
 
+      // Pull TrumpExposed and TrumpCard from gameState root instead of tableInfo
+      const trumpExposed = !!gameState.TrumpExposed;
+      const trumpCard = typeof gameState.TrumpCard === 'string' ? gameState.TrumpCard : '';
+
+      console.log(tableInfo);
+      console.log(trumpExposed, trumpCard);
+
       // Create new game info object
       const newGame = new GameInfo(
         gameStage,
@@ -216,7 +242,9 @@ export class GameInfo {
         gameForfeited,
         dealerPos,
         coolieCount,
-        teams
+        teams,
+        trumpExposed,
+        trumpCard
       );
 
       // Check if the game has changed
@@ -242,6 +270,8 @@ export class GameInfo {
     dealerPos: number;
     coolieCount: readonly number[];
     teams: readonly TeamInfo[];
+    trumpExposed: boolean;
+    trumpCard: string;  // Changed from number to string
   } {
     return Object.freeze({
       gameStage: this._gameStage,
@@ -249,7 +279,9 @@ export class GameInfo {
       gameForfeited: this._gameForfeited,
       dealerPos: this._dealerPos,
       coolieCount: [...this._coolieCount],
-      teams: this._teams.map(team => ({ ...team }))
+      teams: this._teams.map(team => ({ ...team })),
+      trumpExposed: this._trumpExposed,
+      trumpCard: this._trumpCard
     });
   }
 }
