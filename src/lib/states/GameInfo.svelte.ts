@@ -232,9 +232,6 @@ export class GameInfo {
       const trumpExposed = !!gameState.TrumpExposed;
       const trumpCard = typeof gameState.TrumpCard === 'string' ? gameState.TrumpCard : '';
 
-      console.log(tableInfo);
-      console.log(trumpExposed, trumpCard);
-
       // Create new game info object
       const newGame = new GameInfo(
         gameStage,

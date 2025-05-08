@@ -8,6 +8,7 @@
   import Chairs from "../lib/Chairs.svelte";
   import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
   import ActionButtons from "../lib/ActionButtons.svelte";
+  import TrumpCard from "../lib/TrumpCard.svelte";
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
@@ -60,6 +61,8 @@
     <CurrentRoundCards />
 
     <CardsDeck cards={gameController.currentPlayer.playerCards} />
+
+    <TrumpCard />
   </div>
 </div>
 
