@@ -94,7 +94,7 @@
     border-radius: unset;
   }
 
-  .card:hover {
+  .card:hover:not(.showfullcard) {
     transform: translateX(-50%) rotate(var(--rotation)) translateX(var(--translation))
       translateY(-1em);
   }

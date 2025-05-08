@@ -109,11 +109,11 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-    background-color: rgb(182, 226, 21, .5);
+    background-color:  rgb(175, 135, 76);
     color: white;
   }
   
   button:hover {
-    background-color:  rgb(175, 135, 76);
+    background-color: rgb(182, 226, 21, .5);
   }
 </style>
