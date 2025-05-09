@@ -59,7 +59,8 @@ export class BidInfo {
   public get highBidder(): number { return this._highBidder; }
   public get nextBidder(): number { return this._nextBidder; }
   public get nextMinBid(): number { return this._nextMinBid; }
-  public get biddingTeam(): number { return this._highBidder % 2; } // Assuming 0 and 1 are teams
+  public get biddingTeam(): number { return this._highBidder % 2; }
+  public get isThani(): boolean {return this.highBid > 56;}
   public getPointsNeeded(team: number): number {
     if (this.highBid > 56) {
       return (team === this.biddingTeam) ? 8 : 1;
@@ -67,7 +68,7 @@ export class BidInfo {
       return (team === this.biddingTeam) ? this.highBid : (56 - this.highBid) + 1;
     }
   }
-  
+
   // Return a defensive copy of the bidHistory
   public get bidHistory(): ReadonlyArray<BidHistoryEntry> { return this._bidHistory; }
   
