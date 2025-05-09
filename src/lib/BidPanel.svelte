@@ -1,7 +1,6 @@
 <script lang="ts">
   import { getContext } from "svelte";
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
-  import type { Chair } from "./states/Chairs.svelte";
   import { GameStage } from "./states/GameInfo.svelte";
 
   const game: GameController = getContext(gameControllerContextKey);

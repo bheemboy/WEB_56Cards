@@ -3,7 +3,7 @@
   import { getContext, onMount } from "svelte";
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import { ConnectionState } from "../lib/HubConnection.svelte";
-  import CardsDeck from "../lib/CardsDeck.svelte";
+  import CurrentPlayerCards from "../lib/CurrentPlayerCards.svelte";
   import Coolies from "../lib/Coolies.svelte";
   import Chairs from "../lib/Chairs.svelte";
   import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
@@ -61,7 +61,7 @@
 
     <CurrentRoundCards />
 
-    <CardsDeck cards={gameController.currentPlayer.playerCards} />
+    <CurrentPlayerCards />
 
     <TrumpCard />
 

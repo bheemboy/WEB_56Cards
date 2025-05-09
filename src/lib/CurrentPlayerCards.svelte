@@ -6,15 +6,15 @@
     setDeckCardHeight,
     getCardHeight_Fractional,
   } from "./CardHeight.svelte";
+  import { getContext } from "svelte";
+  import { GameController, gameControllerContextKey } from "./GameController.svelte";
+  import { GameStage } from "./states/GameInfo.svelte";
 
-  export interface CardsDeckProps {
-    cards: readonly string[];
-    showfullcard?: boolean;
-    maxcards?: number;
-  }
+  const game: GameController = getContext(gameControllerContextKey);
 
-  let { cards, showfullcard = false, maxcards = 8 }: CardsDeckProps = $props();
+  let { showfullcard = false} = $props();
 
+  const MAXCARDS = 8;
   const ROTATION = 10;
   const TRANSLATION = 20;
 
@@ -22,6 +22,8 @@
   let deckHeight = $state(0);
   let deckWidth = $state(0);
   let cardsData: CardProps[] = $state([]);
+
+  const cards = $derived(game.currentPlayer.playerCards);
 
   $effect(() => {
     let percardrotation = ROTATION;
@@ -33,8 +35,8 @@
       percardrotation = 0;
       percardtranslation = 100;
       deckCardHeight = deckHeight;
-      if (maxcards * deckCardHeight > deckWidth) {
-        let width = deckWidth / maxcards;
+      if (MAXCARDS * deckCardHeight > deckWidth) {
+        let width = deckWidth / MAXCARDS;
         deckCardHeight = width / ASPECT_RATIO;
       }
     } else {
@@ -61,13 +63,17 @@
             ? 0
             : percardrotation * (index - (cards.length - 1) / 2),
         translation: percardtranslation * (index - (cards.length - 1) / 2),
-        oncardplayed,
+        oncardclicked,
       }),
     );
   });
 
-  function oncardplayed(index: number) {
-    console.log(`Card ${cards[index]} at index ${index} played`);
+  function oncardclicked(index: number) {
+    if (game.gameInfo.gameStage === GameStage.PlayingCards) {
+      game.playCard(cards[index], 2000);
+    } else if (game.gameInfo.gameStage === GameStage.SelectingTrump) {
+      game.selectTrump(cards[index]);
+    }
   }
 </script>
 
