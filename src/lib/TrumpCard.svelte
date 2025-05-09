@@ -14,14 +14,17 @@
   let windowHeight = $state(0);
   let windowWidth = $state(0);
   const height: string = $derived(`${Math.min(deckCardHeightContext.h, Math.max(0.12 * windowHeight, 0.12 * windowWidth))}px`);
+
+  function oncardclicked(index: number) {
+    game.showTrump(2000);
+  }
 </script>
 
 <svelte:window bind:innerHeight={windowHeight} bind:innerWidth={windowWidth} />
 
-{#if game.gameInfo.gameStage === GameStage.PlayingCards }
-  <!-- <div class="trumpcard-container" style:height style:aspect-ratio={ASPECT_RATIO}> -->
+{#if game.gameInfo.gameStage === GameStage.PlayingCards && !game.bidInfo.isThani}
   <div class="trumpcard-container" style:height style:aspect-ratio={ASPECT_RATIO}>
-    <Card {card} {height} showfullcard={true} rotation={0} translation={0} />
+    <Card {card} {height} {oncardclicked} showfullcard={true} rotation={0} translation={0} />
   </div>
 {/if}
 

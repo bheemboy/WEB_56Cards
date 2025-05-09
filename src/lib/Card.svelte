@@ -5,7 +5,7 @@
   export interface CardProps {
     card: string;
     height: string;
-    oncardplayed?: (index: number) => void;
+    oncardclicked?: (index: number) => void;
     showfullcard?: boolean;
     rotation?: number;
     translation?: number;
@@ -15,7 +15,7 @@
   const {
     card,
     height,
-    oncardplayed = (index: number) => {},
+    oncardclicked = (index: number) => {},
     showfullcard = true,
     rotation = 0,
     translation = 0,
@@ -55,7 +55,7 @@
     class:showfullcard
     role="button"
     tabindex="0"
-    onclick={() => oncardplayed(index)}
+    onclick={() => oncardclicked(index)}
     onkeydown={() => {}}
     aria-label={`${card} playing card`}
     style:--rotation="{rotation}deg"

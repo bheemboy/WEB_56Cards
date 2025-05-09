@@ -1,23 +1,37 @@
 <script lang="ts">
+  import { getContext } from "svelte";
+  import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
+  import type { Chair } from "./states/Chairs.svelte";
+  import { GameStage } from "./states/GameInfo.svelte";
+
+  const game: GameController = getContext(gameControllerContextKey);
+
   // State management
-  let isVisible = $state(true);
-  let selectedValue = $state('28'); // Initialize with default minimum bid
+  const isVisible = $derived(
+    game.gameInfo.gameStage === GameStage.Bidding && 
+    !game.currentPlayer.watchOnly &&
+    game.currentPlayer.playerPosition === game.bidInfo.nextBidder 
+  );
+  const minimumBid = $derived(game.bidInfo.nextMinBid);
+  let selectedValue = $derived(game.bidInfo.nextMinBid.toString());
+
   let wheelSelectorElement = $state<HTMLElement | null>(null);
-  let minimumBid = $state(28);
   
   let scrollTimeout = $state<ReturnType<typeof setTimeout> | undefined>(undefined);
   const SCROLL_DEBOUNCE_MS = 150; 
 
   // Generate options dynamically based on minimum bid
-  function generateOptions(min: number) {
-    return [
-      ...Array.from({ length: 29 }, (_, i) => {
-        const value = (min + i).toString();
-        return { value, label: value };
-      }),
-      { value: 'thani', label: 'Thani' }
-    ];
-  }
+function generateOptions(min: number) {
+  const length = 57 - min; // Calculate how many numbers from min to 56 (inclusive)
+  
+  return [
+    ...Array.from({ length }, (_, i) => {
+      const value = (min + i).toString();
+      return { value, label: value };
+    }),
+    { value: '57', label: 'Thani' }
+  ];
+}
 
   // Use $derived for reactive values that depend on state
   const allOptions = $derived(generateOptions(minimumBid));
@@ -29,30 +43,21 @@
     }
   });
 
-  export function show(startingBid = 28) {
-    minimumBid = startingBid;
-    selectedValue = startingBid.toString(); // Explicitly set the selected value to the minimum
-    isVisible = true;
-  }
-
-  function hideModal() {
-    isVisible = false;
-  }
-
   function handleBid() {
     if (!selectedValue) {
       alert('Please select an amount to bid.');
       return;
     }
-    console.log('Bid placed for:', selectedValue);
-    alert(`Bid placed for: ${selectedValue}`);
-    hideModal();
+    const bid = parseInt(selectedValue, 10); // Always specify the radix (10 for decimal)
+    if (isNaN(bid)) {
+      console.error(`Could not parse ${selectedValue} to a numeric bid.`);
+      return;
+    }
+    game.placeBid(bid);
   }
 
   function handlePass() {
-    console.log('Passed');
-    alert('Passed');
-    hideModal();
+    game.passBid();
   }
 
   function selectOption(value: string) {
