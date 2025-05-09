@@ -10,6 +10,7 @@
   import ActionButtons from "../lib/ActionButtons.svelte";
   import TrumpCard from "../lib/TrumpCard.svelte";
   import BidPanel from "../lib/BidPanel.svelte";
+  import CenterMessage from "../lib/CenterMessage.svelte";
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
@@ -67,6 +68,7 @@
 
     <BidPanel/>
     
+    <CenterMessage />
   </div>
 </div>
 
