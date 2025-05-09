@@ -48,7 +48,10 @@
   // Function to determine chair position class
   function getPositionClass(index: number): string {
     const mapping = positionClasses[maxPlayers as 4 | 6 | 8];
-    const relativePosn = (firstPlayer + index - currentPlayerPosition + maxPlayers) % maxPlayers;
+    let relativePosn: number = (firstPlayer + index - currentPlayerPosition + maxPlayers) % maxPlayers;
+    if (game.bidInfo.isThani && index > 1) {
+      relativePosn = (firstPlayer + (2*index - 1) - currentPlayerPosition + maxPlayers) % maxPlayers;
+    }
     return mapping[relativePosn as keyof typeof mapping];
   }
 </script>
