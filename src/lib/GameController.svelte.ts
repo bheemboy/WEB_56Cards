@@ -140,12 +140,6 @@ export class GameController {
 
       [this._gameInfo, changed] = GameInfo.update(this._gameInfo, gameState);
       if (changed) console.info("GameInfo changed:", this._gameInfo);
-      if (this._gameInfo.gameCancelled) {
-        this._alertStore.showInfo("", "Game Cancelled");
-      }
-      if (this._gameInfo.gameForfeited) {
-        this._alertStore.showInfo("", "Game Forfeited");
-      }
 
       [this._bidInfo, changed] = BidInfo.update(this._bidInfo, gameState);
       if (changed) console.info("BidInfo changed:", this._bidInfo);
