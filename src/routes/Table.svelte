@@ -9,6 +9,7 @@
   import CurrentRoundCards from "../lib/CurrentRoundCards.svelte";
   import ActionButtons from "../lib/ActionButtons.svelte";
   import TrumpCard from "../lib/TrumpCard.svelte";
+  import BidPanel from "../lib/BidPanel.svelte";
 
   // Get the hub instance from the context
   const gameController: GameController = getContext(gameControllerContextKey);
@@ -63,6 +64,9 @@
     <CardsDeck cards={gameController.currentPlayer.playerCards} />
 
     <TrumpCard />
+
+    <BidPanel/>
+    
   </div>
 </div>
 
