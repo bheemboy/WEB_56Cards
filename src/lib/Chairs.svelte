@@ -72,9 +72,19 @@
     {#if chair.Position === game.gameInfo.dealerPos}
       <div class="dealer"></div>
     {/if}
-    <div class="last-bid"><LastBid {chair}/></div>
+    <div class="last-bid"><LastBid {chair} /></div>
     <div class={`player-name-box ${getChairClasses(chair)}`}>
       <span class="player-name">{chair.Occupant?.Name || ""}</span>
+    </div>
+    <div class="kodibar">
+      {#if (chair.KodiCount ?? 0) > 3}
+        <span class="kodi-count">{chair.KodiCount}x</span> 
+        <div class="kodi"></div>
+      {:else}
+        {#each Array(Math.min(5, chair.KodiCount ?? 0)) as _, index (index)}
+          <div class="kodi"></div>
+        {/each}
+      {/if}
     </div>
   </div>
 {/each}
@@ -90,28 +100,29 @@
   .chair-box.top {
     top: 0cqh;
     grid-template-areas:
-      "N N"
-      "D B";
+      "D N B"
+      "K K K";
   }
 
   .chair-box.bottom {
     bottom: 0cqh;
     grid-template-areas:
+      "K K K"
       "D N B";
   }
 
   .chair-box.right {
     right: 0cqw;
     grid-template-areas:
-      "D N"
-      "B N";
+      "B K"
+      "D N";
   }
 
   .chair-box.left {
     left: 0cqw;
     grid-template-areas:
-      "N D"
-      "N B";
+      "K B"
+      "N D";
   }
 
   /* Position adjustments */
@@ -135,13 +146,13 @@
     .chair-box.vertical.left {
       transform-origin: left bottom;
       transform: translateY(-5cqh) rotate(90deg);
-      grid-template-areas: "D N B";
+      grid-template-areas: "K K K" "D N B";
     }
 
     .chair-box.vertical.right {
       transform-origin: right bottom;
       transform: translateY(-5cqh) rotate(-90deg);
-      grid-template-areas: "B N D";
+      grid-template-areas: "K K K" "B N D";
     }
 
     .chair-box.top {
@@ -171,6 +182,7 @@
 
   .player-name {
     color: rgba(255, 255, 255, 0.87);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -223,4 +235,38 @@
   .last-bid {
     grid-area: B;
   }
+
+  .kodibar {
+    position: relative;
+    grid-area: K;
+    display: flex;
+    flex-direction: row;
+    gap: 1px;
+    /* border: 1px solid white; */
+  }
+
+  .kodi-count {
+    font-size: 20px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  }
+
+  .kodi {
+    position: relative;
+    width: 25px;
+    aspect-ratio: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("/images/kodi.svg");
+  }
+
+  @container cards-table (width < 550px) {
+    .kodi-count {
+      font-size: 25px;
+    }
+  .kodi {
+      width: 25px;
+    }
+  }
+
 </style>
