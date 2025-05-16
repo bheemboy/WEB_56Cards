@@ -93,7 +93,7 @@
     height: 20cqh;
     /* background-color: rgba(22, 256, 22, 0.5); */
   }
-  @container cards-table (orientation: landscape) and (height < 450px) {
+  @container cards-table (orientation: landscape) and (height < 550px) {
     .deck-container {
       bottom: 45px;
       height: 13cqh;

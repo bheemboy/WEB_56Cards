@@ -13,7 +13,6 @@
   const playedCards = $derived(game.roundsInfo.currentRound.PlayedCards);
 
   let deckCardHeightContext: CardHeightContext = $state(getContext(cardHeightContextKey));
-  let gridCellHeight: number = $state(0);
 
   const positionClasses = {
     4: {
@@ -58,8 +57,8 @@
 
 <div class={`card-container p${maxPlayers}`}>
   {#each playedCards as card, index}
-    <div class={`card ${getPositionClass(index)}`} bind:clientHeight={gridCellHeight}>
-      <Card {card} height={Math.min(gridCellHeight, deckCardHeightContext.h) + "px"} showfullcard={true} rotation={0} translation={0} />
+    <div class={`card ${getPositionClass(index)}`}>
+      <Card {card} height={deckCardHeightContext.h + "px"} showfullcard={true} rotation={0} translation={0} />
     </div>
   {/each}
 </div>
@@ -104,20 +103,20 @@
       ".   .   .   B   .   .   .";
   }
 
-  @container cards-table (orientation: landscape) and (height < 450px) {
+  @container cards-table (orientation: landscape) and (height < 550px) {
     .card-container {
       height: 55cqh;
       top: 15cqh;
     }
   }
 
-  @container cards-table (width > 450px) {
+  @container cards-table (width > 550px) {
     .card-container {
       width: 50cqw;
     }
   }
 
-  @container cards-table (width > 780px) {
+  @container cards-table (width > 1000px) {
     .card-container {
       width: 40cqw;
     }

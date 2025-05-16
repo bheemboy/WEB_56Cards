@@ -99,7 +99,7 @@
   }
 
   /* larger screens */
-  @container cards-table-container (width > 800px) and (height > 800px) {
+  @container cards-table-container (width > 1000px) {
     .table {
       width: min(100cqh, 100cqw);
       height: min(100cqh, 100cqw);
