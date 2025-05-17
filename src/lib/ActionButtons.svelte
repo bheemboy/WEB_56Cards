@@ -3,6 +3,7 @@
   import { GameController, gameControllerContextKey } from "../lib/GameController.svelte";
   import { GameStage } from "./states/GameInfo.svelte";
   import Confirmation from "./Confirmation.svelte";
+  import PenultimateRound from "./PenultimateRound.svelte";
 
   const game: GameController = getContext(gameControllerContextKey);
 
@@ -47,7 +48,7 @@
     </div>
   {/if}
 
-  {#if game.roundsInfo.rounds.length > 1 && game.gameInfo.gameStage === GameStage.PlayingCards}
+  {#if game.roundsInfo.penultimateRound && game.gameInfo.gameStage === GameStage.PlayingCards}
     <div class="button-container">
       <button class="game-button viewlastround" onclick={handleViewLastRound}>
         <!-- View Last Round SVG -->
@@ -60,6 +61,7 @@
           <path fill="none" d="M21.2 17.97s-3.09 3.5-7.16 3.5-7.15-3.5-7.15-3.5 3.31-3.5 7.15-3.5 7.16 3.5 7.16 3.5z" />
         </svg>
       </button>
+      <!-- <PenultimateRound /> -->
     </div>
   {/if}
 

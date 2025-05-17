@@ -83,6 +83,13 @@ export class RoundsInfo {
   }
 
   /**
+   * Get the penultimate (second to last) round or null if fewer than 2 rounds exist
+   */
+  public get penultimateRound(): Round | null {
+    return this._rounds.length > 1 ? this._rounds[this._rounds.length - 2] : null;
+  }
+
+  /**
    * Factory method to create a default RoundsInfo instance
    */
   public static create(): RoundsInfo {
