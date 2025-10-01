@@ -1,0 +1,43 @@
+{
+  "name": "Svelte 5 Development",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "svelte.svelte-vscode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "[svelte]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "svelte.enable-ts-plugin": true,
+        "typescript.tsdk": "node_modules/typescript/lib"
+      }
+    }
+  },
+
+  "forwardPorts": [5173],
+  
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "postCreateCommand": "npm install",
+
+  "postAttachCommand": "npm run dev -- --host",
+
+  "remoteUser": "node"
+}
