@@ -4,7 +4,6 @@
   import {
     ASPECT_RATIO,
     setDeckCardHeight,
-    getCardHeight_Fractional,
   } from "./CardHeight.svelte";
   import { getContext } from "svelte";
   import { GameController, gameControllerContextKey } from "./GameController.svelte";
@@ -15,10 +14,8 @@
   let { showfullcard = false} = $props();
 
   const MAXCARDS = 8;
-  const ROTATION = 10;
-  const TRANSLATION = 20;
+  const TRANSLATION = 27;
 
-  let deckCardHeight = 0;
   let deckHeight = $state(0);
   let deckWidth = $state(0);
   let cardsData: CardProps[] = $state([]);
@@ -26,26 +23,16 @@
   const cards = $derived(game.currentPlayer.playerCards);
 
   $effect(() => {
-    let percardrotation = ROTATION;
     let percardtranslation = TRANSLATION;
-
-    let calcshowfullcard = deckHeight <= 100 || showfullcard;
+    let calcshowfullcard = false; //deckHeight <= 100 || showfullcard;
+    let deckCardHeight = deckHeight;
 
     if (calcshowfullcard) {
-      percardrotation = 0;
       percardtranslation = 100;
-      deckCardHeight = deckHeight;
       if (MAXCARDS * deckCardHeight > deckWidth) {
         let width = deckWidth / MAXCARDS;
         deckCardHeight = width / ASPECT_RATIO;
       }
-    } else {
-      deckCardHeight = getCardHeight_Fractional(
-        percardrotation * 3.5,
-        (percardtranslation * 3.5) / 100,
-        deckWidth / 2,
-        -1 * deckHeight,
-      );
     }
 
     // console.log("height =", deckCardHeight, "deckHeight =", deckHeight, "deckWidth/2 =", deckWidth/2);
@@ -58,10 +45,6 @@
         index,
         height: deckCardHeight + "px",
         showfullcard: calcshowfullcard,
-        rotation:
-          cards.length == 1
-            ? 0
-            : percardrotation * (index - (cards.length - 1) / 2),
         translation: percardtranslation * (index - (cards.length - 1) / 2),
         oncardclicked,
       }),
