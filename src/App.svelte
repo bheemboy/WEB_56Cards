@@ -18,6 +18,17 @@
   // Simple client-side routing
   let currentPath = $state(window.location.pathname);
   
+  // Handle redirect parameter from 404.html
+  $effect(() => {
+    const url = new URL(window.location.href);
+    const redirect = url.searchParams.get('redirect');
+    if (redirect) {
+      // Remove the redirect param and navigate to the original path
+      window.history.replaceState({}, '', redirect);
+      currentPath = new URL(redirect, window.location.origin).pathname;
+    }
+  });
+  
   // Update path when URL changes
   window.addEventListener('popstate', () => {
     currentPath = window.location.pathname;

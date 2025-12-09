@@ -7,5 +7,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // Important for Docker
     port: 5173, // Default Vite port
+  },
+  build: {
+    // Ensure proper base path for GitHub Pages
+    outDir: 'dist',
+    emptyOutDir: true,
   }
 })
