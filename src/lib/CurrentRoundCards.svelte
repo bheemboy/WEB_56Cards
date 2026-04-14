@@ -58,7 +58,7 @@
 <div class={`card-container p${maxPlayers}`}>
   {#each playedCards as card, index}
     <div class={`card ${getPositionClass(index)}`}>
-      <Card {card} height={deckCardHeightContext.h + "px"} showfullcard={true} rotation={0} translation={0} />
+      <Card {card} height={deckCardHeightContext.h + "px"} showfullcard={true} translation={0} />
     </div>
   {/each}
 </div>

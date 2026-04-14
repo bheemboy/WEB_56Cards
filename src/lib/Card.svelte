@@ -7,7 +7,6 @@
     height: string;
     oncardclicked?: (index: number) => void;
     showfullcard?: boolean;
-    rotation?: number;
     translation?: number;
     index?: number;
   }
@@ -17,7 +16,6 @@
     height,
     oncardclicked = (index: number) => {},
     showfullcard = true,
-    rotation = 0,
     translation = 0,
     index = 0,
   }: CardProps = $props();
@@ -58,7 +56,6 @@
     onclick={() => oncardclicked(index)}
     onkeydown={() => {}}
     aria-label={`${card} playing card`}
-    style:--rotation="{rotation}deg"
     style:--translation="{translation}%"
     style:--card-aspect-ratio={ASPECT_RATIO}
     style:height={height}
@@ -74,7 +71,7 @@
     top: 1px;
     left: 50%;
     transform-origin: center bottom;
-    transform: translateX(-50%) rotate(var(--rotation)) translateX(var(--translation));
+    transform: translateX(-50%) translateX(var(--translation));
     box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.5);
     border-radius: 10%;
     aspect-ratio: var(--card-aspect-ratio);
@@ -95,8 +92,7 @@
   }
 
   .card:hover:not(.showfullcard) {
-    transform: translateX(-50%) rotate(var(--rotation)) translateX(var(--translation))
-      translateY(-1em);
+    transform: translateX(-50%) translateX(var(--translation)) translateY(-1em);
   }
 
   .error {

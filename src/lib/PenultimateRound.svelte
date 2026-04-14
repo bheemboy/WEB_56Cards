@@ -16,7 +16,7 @@
 
 <div class={`card-container p${maxPlayers}`}>
   {#each penultimateRoundCards as card, index}
-    <Card {card} height={deckCardHeightContext.h + "px"} showfullcard={false} rotation={0} translation={33*index} />
+    <Card {card} height={deckCardHeightContext.h + "px"} showfullcard={false} translation={33*index} />
   {/each}
 </div>
 

@@ -24,7 +24,7 @@
 
 {#if game.gameInfo.gameStage === GameStage.PlayingCards && !game.bidInfo.isThani}
   <div class="trumpcard-container" style:height style:aspect-ratio={ASPECT_RATIO}>
-    <Card {card} {height} {oncardclicked} showfullcard={true} rotation={0} translation={0} />
+    <Card {card} {height} {oncardclicked} showfullcard={true} translation={0} />
   </div>
 {/if}
 
